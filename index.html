@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Global Defense Intel</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap');
+:root{
+  --bg:#08090d;
+  --surface:#0f1117;
+  --card:#13161f;
+  --card2:#191d29;
+  --border:#ffffff10;
+  --border2:#ffffff18;
+  --accent:#ff4757;
+  --accent2:#ffa502;
+  --accent3:#2ed573;
+  --cyan:#00d2ff;
+  --purple:#9c59ff;
+  --text:#e8eaf0;
+  --dim:#6b7280;
+  --dim2:#9ca3af;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ffffff20;border-radius:10px}
+
+/* HEADER */
+header{
+  background:rgba(8,9,13,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border2);
+  padding:0 32px;
+  height:60px;
+  display:flex;align-items:center;gap:20px;
+  position:sticky;top:0;z-index:1000;
+}
+.logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:1.1rem;font-weight:900;
+  background:linear-gradient(135deg,#ff4757,#ff6b81,#ffa502);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:2px;
+}
+.header-sep{width:1px;height:24px;background:var(--border2)}
+.header-sub{font-size:.65rem;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+.live-pill{
+  margin-left:auto;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,71,87,.12);
+  border:1px solid rgba(255,71,87,.3);
+  padding:4px 12px;border-radius:100px;
+  font-size:.65rem;font-weight:700;color:#ff4757;letter-spacing:1px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#ff4757;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* NAV */
+.nav{
+  background:rgba(13,15,22,0.8);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  display:flex;gap:0;overflow-x:auto;
+  scrollbar-width:none;
+  position:sticky;top:60px;z-index:999;
+}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{
+  flex-shrink:0;padding:14px 28px;
+  border:none;background:none;
+  color:var(--dim);cursor:pointer;
+  font-size:.72rem;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  border-bottom:2px solid transparent;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  position:relative;white-space:nowrap;
+  font-family:'Inter',sans-serif;
+}
+.nav-btn:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-btn.active::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+
+/* VIEWS */
+.view{display:none;animation:viewIn .35s cubic-bezier(.4,0,.2,1)}
+.view.active{display:block}
+@keyframes viewIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ HOME ═══ */
+.hero{
+  padding:60px 40px 40px;
+  text-align:center;
+  background:radial-gradient(ellipse 80% 60% at 50% -20%,rgba(255,71,87,.08),transparent);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.2);
+  padding:5px 14px;border-radius:100px;
+  font-size:.65rem;font-weight:600;color:var(--accent);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;
+}
+.hero h1{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.8rem,4vw,3rem);
+  font-weight:900;color:#fff;
+  line-height:1.1;margin-bottom:12px;
+}
+.hero h1 span{
+  background:linear-gradient(135deg,#ff4757,#ffa502);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p{color:var(--dim2);font-size:.9rem;max-width:500px;margin:0 auto 40px}
+
+.gstats{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:50px}
+.gstat{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:12px;padding:16px 24px;
+  text-align:center;
+  transition:transform .2s,border-color .2s;
+}
+.gstat:hover{transform:translateY(-2px);border-color:rgba(255,71,87,.3)}
+.gstat .v{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:#fff}
+.gstat .l{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+
+.section-label{
+  padding:0 40px 16px;
+  font-size:.65rem;color:var(--dim);
+  letter-spacing:3px;text-transform:uppercase;
+  display:flex;align-items:center;gap:12px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:0 40px 60px}
+
+.ccard{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  overflow:hidden;cursor:pointer;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.ccard::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,71,87,.04),transparent,rgba(255,165,2,.03));
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.ccard:hover{transform:translateY(-4px);border-color:rgba(255,71,87,.3);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,71,87,.1)}
+.ccard:hover::before{opacity:1}
+.ccard.in-compare{border-color:rgba(255,165,2,.5);box-shadow:0 0 0 2px rgba(255,165,2,.15)}
+
+.ccard-accent{height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.ccard-body{padding:20px}
+.ccard-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.ccard-flag{font-size:2.2rem;line-height:1;flex-shrink:0}
+.ccard-info{flex:1}
+.ccard-name{font-size:1rem;font-weight:800;color:#fff;margin-bottom:2px}
+.ccard-rank{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.nuke-tag{
+  display:inline-flex;align-items:center;gap:4px;margin-top:6px;
+  background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.25);
+  color:var(--accent);padding:2px 8px;border-radius:100px;font-size:.62rem;font-weight:600;
+}
+.ccard-compare-badge{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent2),#ff6b35);
+  display:none;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:800;color:#000;flex-shrink:0;
+}
+.in-compare .ccard-compare-badge{display:flex}
+
+.ccard-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.cs{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+.cs .sv{font-size:.9rem;font-weight:700;color:#fff}
+.cs .sl{font-size:.58rem;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+.rating-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.rating-label-txt{font-size:.65rem;color:var(--dim);white-space:nowrap}
+.rating-track{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.rating-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.rating-val{font-size:.72rem;font-weight:700;color:var(--accent2);white-space:nowrap}
+
+.ccard-actions{display:flex;gap:8px;position:relative;z-index:1}
+.btn{
+  flex:1;padding:8px 12px;border-radius:8px;border:none;
+  font-size:.72rem;font-weight:600;cursor:pointer;
+  letter-spacing:.5px;transition:all .2s;font-family:'Inter',sans-serif;
+}
+.btn-primary{background:linear-gradient(135deg,rgba(255,71,87,.15),rgba(255,71,87,.08));color:var(--accent);border:1px solid rgba(255,71,87,.25)}
+.btn-primary:hover{background:rgba(255,71,87,.25);border-color:rgba(255,71,87,.5)}
+.btn-secondary{background:rgba(255,165,2,.07);color:var(--accent2);border:1px solid rgba(255,165,2,.2)}
+.btn-secondary:hover{background:rgba(255,165,2,.18)}
+
+/* ═══ DETAIL ═══ */
+.detail-topbar{
+  padding:16px 40px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);
+}
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border2);
+  color:var(--dim2);padding:7px 14px;border-radius:8px;
+  cursor:pointer;font-size:.75rem;font-weight:500;
+  transition:all .2s;font-family:'Inter',sans-serif;border:none;
+}
+.back-btn:hover{background:rgba(255,255,255,.09);color:#fff}
+.breadcrumb{font-size:.78rem;color:var(--dim)}
+
+.detail-hero{
+  padding:40px;
+  background:radial-gradient(ellipse 60% 80% at 0% 50%,rgba(255,71,87,.06),transparent);
+  border-bottom:1px solid var(--border);
+}
+.dh-grid{display:grid;grid-template-columns:1fr auto;gap:30px;align-items:start}
+.dh-left{}
+.dh-flag{font-size:4rem;margin-bottom:8px;display:block;animation:flagIn .5s cubic-bezier(.4,0,.2,1)}
+@keyframes flagIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.dh-name{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:#fff;margin-bottom:6px}
+.dh-rank-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.25);
+  padding:4px 14px;border-radius:100px;
+  font-size:.7rem;font-weight:700;color:var(--accent);
+  letter-spacing:1px;margin-bottom:14px;
+}
+.dh-overview{font-size:.88rem;line-height:1.8;color:var(--dim2);max-width:700px;margin-bottom:20px}
+.dh-metrics{display:flex;flex-wrap:wrap;gap:10px}
+.dhm{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 18px;
+  transition:border-color .2s;
+}
+.dhm:hover{border-color:rgba(255,71,87,.2)}
+.dhm .mv{font-size:1.1rem;font-weight:800;color:#fff}
+.dhm .ml{font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.dh-right{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.big-rating{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:16px;padding:24px;text-align:center;min-width:140px;
+}
+.big-rating .rv{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.big-rating .rl{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+.nuke-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);
+  color:var(--accent);padding:6px 14px;border-radius:8px;font-size:.7rem;font-weight:600;
+}
+
+/* DETAIL TABS */
+.dtabs{
+  display:flex;gap:0;overflow-x:auto;
+  scrollbar-width:none;border-bottom:1px solid var(--border);
+  padding:0 40px;background:var(--surface);
+  position:sticky;top:116px;z-index:100;
+}
+.dtabs::-webkit-scrollbar{display:none}
+.dtab{
+  flex-shrink:0;padding:13px 20px;border:none;background:none;
+  color:var(--dim);cursor:pointer;font-size:.7rem;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid transparent;
+  transition:all .2s;white-space:nowrap;font-family:'Inter',sans-serif;
+}
+.dtab:hover{color:var(--text)}
+.dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.dsec{display:none;padding:36px 40px;animation:viewIn .3s ease}
+.dsec.active{display:block}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.full{grid-column:1/-1}
+
+.acard{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:12px;overflow:hidden;
+  transition:border-color .2s,transform .2s;
+}
+.acard:hover{border-color:rgba(255,71,87,.2);transform:translateY(-1px)}
+.acard-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;
+  background:rgba(255,255,255,.02);
+  border-bottom:1px solid var(--border);
+}
+.acard-icon{font-size:1.2rem}
+.acard-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim2)}
+.acard-badge{
+  margin-left:auto;
+  background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);
+  color:var(--accent);padding:2px 10px;border-radius:100px;font-size:.65rem;font-weight:700;
+}
+.acard-body{padding:14px 16px}
+
+.ai-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.ai-item:last-child{border:none}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--dim);margin-top:6px;flex-shrink:0}
+.ai-dot.r{background:var(--accent)}.ai-dot.g{background:var(--accent2)}.ai-dot.a3{background:var(--accent3)}.ai-dot.cy{background:var(--cyan)}.ai-dot.p{background:var(--purple)}
+.ai-name{font-size:.8rem;font-weight:600;color:#fff}
+.ai-detail{font-size:.7rem;color:var(--dim);margin-top:2px;line-height:1.4}
+.ai-count{margin-left:auto;font-size:.75rem;font-weight:700;color:var(--accent2);white-space:nowrap;padding-left:10px}
+
+/* PROS CONS */
+.pc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.pc-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:20px}
+.pc-header{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pc-header.pro{color:var(--accent3)}
+.pc-header.con{color:var(--accent)}
+.pc-item{display:flex;gap:10px;padding:6px 0;font-size:.8rem;color:var(--dim2);line-height:1.5;align-items:flex-start}
+.pc-bullet.pro{color:var(--accent3);flex-shrink:0;margin-top:2px}
+.pc-bullet.con{color:var(--accent);flex-shrink:0;margin-top:2px}
+
+/* METER BARS */
+.meter-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:24px;margin-bottom:20px}
+.meter-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--dim);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.meter-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.meter-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.meter-row:last-child{margin:0}
+.meter-label{font-size:.75rem;color:var(--dim2);width:180px;flex-shrink:0}
+.meter-track{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.mbar{height:100%;border-radius:3px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.mbar.red{background:linear-gradient(90deg,#c0392b,var(--accent))}
+.mbar.orange{background:linear-gradient(90deg,#e67e22,var(--accent2))}
+.mbar.green{background:linear-gradient(90deg,#27ae60,var(--accent3))}
+.mbar.cyan{background:linear-gradient(90deg,#0077aa,var(--cyan))}
+.mbar.purple{background:linear-gradient(90deg,#6c3483,var(--purple))}
+.meter-val{font-size:.75rem;font-weight:700;color:#fff;width:32px;text-align:right}
+
+/* MAP */
+#map{height:420px;border-radius:0 0 12px 12px;z-index:1}
+.map-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.map-header{padding:14px 18px;border-bottom:1px solid var(--border);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim2);display:flex;align-items:center;gap:8px}
+.map-legend{display:flex;gap:20px;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap}
+.mleg{display:flex;align-items:center;gap:6px;font-size:.68rem;color:var(--dim)}
+.mleg-dot{width:10px;height:10px;border-radius:50%}
+.base-list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}
+.base-chip{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 14px;
+  display:flex;align-items:flex-start;gap:10px;
+  transition:border-color .2s;
+}
+.base-chip:hover{border-color:rgba(255,71,87,.25)}
+.base-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.base-name{font-size:.78rem;font-weight:600;color:#fff}
+.base-type{font-size:.68rem;color:var(--dim);margin-top:2px}
+.base-tag{font-size:.6rem;font-weight:600;padding:1px 7px;border-radius:100px;display:inline-block;margin-top:4px}
+.base-tag.major{background:rgba(0,210,255,.1);color:var(--cyan);border:1px solid rgba(0,210,255,.2)}
+.base-tag.medium{background:rgba(255,165,2,.1);color:var(--accent2);border:1px solid rgba(255,165,2,.2)}
+
+/* BUDGET */
+.budget-hero{
+  background:linear-gradient(135deg,rgba(255,71,87,.08),rgba(255,165,2,.05));
+  border:1px solid var(--border2);border-radius:16px;
+  padding:30px;margin-bottom:24px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:20px;
+}
+.bh-item{}
+.bh-val{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:700;color:#fff}
+.bh-label{font-size:.62rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+.bh-sub{font-size:.72rem;color:var(--dim2);margin-top:4px}
+
+.budget-compare{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:24px;margin-bottom:20px}
+
+/* RATING */
+.rating-hero{
+  display:grid;grid-template-columns:auto 1fr;gap:30px;
+  background:var(--card);border:1px solid var(--border2);border-radius:16px;
+  padding:30px;margin-bottom:24px;align-items:center;
+}
+.rh-big{text-align:center;padding-right:30px;border-right:1px solid var(--border)}
+.rh-score{font-family:'Orbitron',sans-serif;font-size:4rem;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.rh-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:2px;margin-top:6px}
+.rh-tier{font-size:.8rem;color:var(--accent2);font-weight:600;margin-top:8px}
+
+/* ═══ COMPARE ═══ */
+.compare-wrap{padding:40px}
+.compare-hero{text-align:center;margin-bottom:40px}
+.compare-hero h2{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:8px}
+.compare-hero p{color:var(--dim);font-size:.85rem}
+
+.compare-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
+.chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 16px;cursor:pointer;
+  transition:all .2s;
+}
+.chip:hover{border-color:rgba(255,165,2,.3);background:rgba(255,165,2,.05)}
+.chip.selected{border-color:rgba(255,165,2,.6);background:rgba(255,165,2,.1);box-shadow:0 0 20px rgba(255,165,2,.08)}
+.chip-flag{font-size:1.3rem}
+.chip-name{font-size:.82rem;font-weight:600;color:#fff}
+.chip-rank{font-size:.62rem;color:var(--dim)}
+.chip-check{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.65rem;transition:all .2s}
+.chip.selected .chip-check{background:var(--accent2);border-color:var(--accent2);color:#000;font-weight:800}
+
+.compare-action-bar{display:flex;align-items:center;gap:16px;margin-bottom:32px;padding:16px 20px;background:var(--card);border:1px solid var(--border2);border-radius:12px}
+.csel-count{font-size:.82rem;color:var(--dim2);flex:1}
+.csel-count span{color:#fff;font-weight:700}
+.run-btn{
+  padding:10px 28px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:700;font-size:.82rem;font-family:'Inter',sans-serif;
+  transition:all .2s;letter-spacing:.5px;
+}
+.run-btn:hover{opacity:.85;transform:translateY(-1px)}
+.run-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.clear-btn{padding:10px 20px;border-radius:10px;border:1px solid var(--border2);background:none;color:var(--dim2);font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.clear-btn:hover{background:rgba(255,255,255,.05);color:#fff}
+
+/* COMPARE TABLE */
+.ctable-wrap{overflow-x:auto;margin-bottom:32px;border-radius:12px;border:1px solid var(--border2)}
+.ctable{width:100%;border-collapse:collapse;min-width:500px}
+.ctable th{
+  background:rgba(255,71,87,.06);
+  border-bottom:1px solid var(--border2);
+  padding:16px 18px;text-align:center;
+  font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+}
+.ctable th.rh{text-align:left;color:var(--dim);background:transparent;width:160px}
+.ctable th.country-th{color:#fff}
+.ctable td{
+  border-bottom:1px solid rgba(255,255,255,.04);
+  padding:14px 18px;text-align:center;font-size:.82rem;
+  transition:background .15s;
+}
+.ctable tr:last-child td{border:none}
+.ctable tr:hover td{background:rgba(255,255,255,.02)}
+.ctable td.rh{text-align:left;color:var(--dim);font-size:.72rem;font-weight:600;background:rgba(255,255,255,.01)}
+.best-cell{background:rgba(46,213,115,.04)!important;border-left:2px solid var(--accent3)!important}
+.best-label{font-size:.6rem;color:var(--accent3);font-weight:700;margin-top:3px;letter-spacing:.5px}
+.ct-val{font-weight:700;color:#fff;font-size:.88rem}
+.ct-sub{font-size:.65rem;color:var(--dim);margin-top:2px}
+
+.insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:32px}
+.insight-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:20px;transition:border-color .2s}
+.insight-card:hover{border-color:rgba(255,71,87,.2)}
+.insight-icon{font-size:1.5rem;margin-bottom:8px}
+.insight-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.insight-value{font-size:1rem;font-weight:700;color:#fff}
+.insight-sub{font-size:.75rem;color:var(--dim2);margin-top:4px}
+
+.tag{display:inline-block;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--dim2);padding:2px 8px;border-radius:5px;font-size:.65rem;margin:2px}
+
+@media(max-width:768px){
+  .home-grid,.compare-wrap,.dsec,.detail-hero,.detail-topbar{padding-left:16px;padding-right:16px}
+  .hero{padding:40px 16px 30px}
+  .dh-grid{grid-template-columns:1fr}
+  .dh-right{align-items:flex-start}
+  .pc-grid{grid-template-columns:1fr}
+  .rating-hero{grid-template-columns:1fr}
+  .rh-big{border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">GDI</div>
+  <div class="header-sep"></div>
+  <div class="header-sub">Global Defense Intelligence · 2025–2026</div>
+  <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+</header>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showView('home',this)">🌐 Countries</button>
+  <button class="nav-btn" id="detail-navbtn" onclick="showView('detail',this)" style="display:none">📊 Profile</button>
+  <button class="nav-btn" onclick="showView('compare',this)">⚖️ Compare</button>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div id="view-home" class="view active">
+  <div class="hero">
+    <div class="hero-eyebrow">☆ Top 10 Military Powers · 2025</div>
+    <h1>Global <span>Military</span><br>Power Index</h1>
+    <p>Explore detailed defense profiles, compare nations head-to-head, and map global military presence</p>
+    <div class="gstats">
+      <div class="gstat"><div class="v">$2.4T+</div><div class="l">Combined Budget</div></div>
+      <div class="gstat"><div class="v">9,614</div><div class="l">Nuclear Warheads</div></div>
+      <div class="gstat"><div class="v">20M+</div><div class="l">Active Personnel</div></div>
+      <div class="gstat"><div class="v">50K+</div><div class="l">Combat Aircraft</div></div>
+      <div class="gstat"><div class="v">6</div><div class="l">Nuclear States</div></div>
+    </div>
+  </div>
+  <div class="section-label">SELECT A COUNTRY TO EXPLORE</div>
+  <div class="home-grid" id="homeGrid"></div>
+</div>
+
+<!-- ═══ DETAIL ═══ -->
+<div id="view-detail" class="view">
+  <div class="detail-topbar">
+    <button class="back-btn" onclick="showView('home',document.querySelector('.nav-btn'))">← Back</button>
+    <span class="breadcrumb" id="d-breadcrumb"></span>
+  </div>
+  <div class="detail-hero">
+    <div class="dh-grid">
+      <div class="dh-left">
+        <span class="dh-flag" id="d-flag"></span>
+        <div class="dh-name" id="d-name"></div>
+        <div class="dh-rank-pill" id="d-rank"></div>
+        <div class="dh-overview" id="d-overview"></div>
+        <div class="dh-metrics" id="d-metrics"></div>
+        <div id="d-nuke" style="margin-top:10px"></div>
+      </div>
+      <div class="dh-right">
+        <div class="big-rating"><div class="rv" id="d-rating-big"></div><div class="rl">Power Rating</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="dtabs">
+    <button class="dtab active" onclick="showDTab('overview',this)">📋 Overview</button>
+    <button class="dtab" onclick="showDTab('aircraft',this)">✈️ Aircraft</button>
+    <button class="dtab" onclick="showDTab('naval',this)">⚓ Naval</button>
+    <button class="dtab" onclick="showDTab('missiles',this)">🚀 Missiles</button>
+    <button class="dtab" onclick="showDTab('ground',this)">🛡️ Ground</button>
+    <button class="dtab" onclick="showDTab('tech',this)">💻 Tech</button>
+    <button class="dtab" onclick="showDTab('bases',this)">🗺️ Bases</button>
+    <button class="dtab" onclick="showDTab('budget',this)">💰 Budget</button>
+    <button class="dtab" onclick="showDTab('rating',this)">⭐ Rating</button>
+  </div>
+  <div id="dsec-overview" class="dsec active"></div>
+  <div id="dsec-aircraft" class="dsec"></div>
+  <div id="dsec-naval" class="dsec"></div>
+  <div id="dsec-missiles" class="dsec"></div>
+  <div id="dsec-ground" class="dsec"></div>
+  <div id="dsec-tech" class="dsec"></div>
+  <div id="dsec-bases" class="dsec"></div>
+  <div id="dsec-budget" class="dsec"></div>
+  <div id="dsec-rating" class="dsec"></div>
+</div>
+
+<!-- ═══ COMPARE ═══ -->
+<div id="view-compare" class="view">
+  <div class="compare-wrap">
+    <div class="compare-hero">
+      <h2>⚖️ Compare Nations</h2>
+      <p>Select 2 to 4 countries for a head-to-head military comparison</p>
+    </div>
+    <div class="compare-select-grid" id="compareChips"></div>
+    <div class="compare-action-bar">
+      <div class="csel-count" id="selCount"><span>0</span> countries selected (need at least 2)</div>
+      <button class="clear-btn" onclick="clearCompare()">Clear</button>
+      <button class="run-btn" id="runBtn" onclick="runComparison()" disabled>Run Comparison →</button>
+    </div>
+    <div id="compareResult" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ DATA ══════════ */
+const DATA = {
+usa:{id:'usa',flag:'🇺🇸',name:'United States',rank:1,nuclear:true,warheads:5550,budget:'$886B',budgetNum:886,personnel:'1.33M',personnelNum:1330000,aircraft:13247,tanks:6612,naval:484,gfp:0.0744,rating:99,
+nuclearNote:'5,550 warheads · Trident II D5 · Minuteman III · B61 gravity bombs',
+overview:'The world\'s undisputed military superpower. With ~$886B in annual defense spending — more than the next 10 nations combined — the US maintains 11 nuclear carriers, the largest stealth fleet, 750+ overseas bases, and unmatched power projection across every domain: land, sea, air, space, and cyber.',
+metrics:[{v:'$886B',l:'Defense Budget'},{v:'1.33M',l:'Active Personnel'},{v:'5,550',l:'Nuclear Warheads'},{v:'750+',l:'Overseas Bases'},{v:'13,247',l:'Total Aircraft'}],
+success:[{l:'Global Power Projection',v:99,c:'red'},{l:'Naval Dominance',v:99,c:'cyan'},{l:'Air Superiority',v:98,c:'red'},{l:'Nuclear Deterrence',v:97,c:'orange'},{l:'Cyber Warfare',v:98,c:'green'},{l:'Space Capability',v:99,c:'purple'},{l:'Intelligence (SIGINT)',v:99,c:'cyan'},{l:'Combat Experience',v:95,c:'orange'}],
+pros:['World\'s largest defense budget ($886B)','11 nuclear aircraft carriers — more than all others combined','Most advanced stealth aircraft: F-22, F-35, B-2, B-21','Global network of 750+ military bases in 80+ countries','Dominant cyber & space capabilities (USCYBERCOM, USSF)','Most advanced missile defense: THAAD, Patriot PAC-3','Strongest NATO alliance — leads combined military of 32 nations'],
+cons:['Extremely high operational costs — hard to sustain long wars','Over-reliance on complex, expensive platforms','Domestic political constraints on deployment decisions','Aging nuclear delivery vehicles (Minuteman III from 1970s)','Peer adversaries catching up in hypersonic weapons'],
+budget:{total:'$886B',pct:'3.5% of GDP',personnel:'$250B',procurement:'$170B',rd:'$145B',ops:'$321B',note:'Largest military budget in history. More than China, Russia, India, UK, France, Germany, Japan, S.Korea, and Australia combined.'},
+tier:'Superpower',
+bases:[{name:'Camp Pendleton, CA',lat:33.37,lon:-117.56,type:'Army/Marines',size:'major'},{name:'Norfolk Naval Base, VA',lat:36.93,lon:-76.30,type:'Navy HQ — largest in world',size:'major'},{name:'Ramstein AB, Germany',lat:49.44,lon:7.60,type:'US Air Force Europe HQ',size:'major'},{name:'Yokosuka, Japan',lat:35.28,lon:139.67,type:'7th Fleet HQ',size:'major'},{name:'Camp Humphreys, S.Korea',lat:36.97,lon:127.03,type:'US Forces Korea HQ',size:'major'},{name:'Diego Garcia, BIOT',lat:-7.31,lon:72.41,type:'Joint — Indian Ocean hub',size:'major'},{name:'Al Udeid, Qatar',lat:25.11,lon:51.31,type:'USAF — CENTCOM air ops',size:'major'},{name:'Incirlik AB, Turkey',lat:37.00,lon:35.43,type:'NATO nuclear host — B61 bombs',size:'major'},{name:'Andersen AFB, Guam',lat:13.58,lon:144.93,type:'Strategic Pacific bomber base',size:'major'},{name:'Camp Lemonnier, Djibouti',lat:11.55,lon:43.15,type:'AFRICOM/SOCOM forward',size:'major'},{name:'Pearl Harbor, Hawaii',lat:21.35,lon:-157.97,type:'Pacific Fleet / Joint',size:'major'},{name:'Aviano AB, Italy',lat:46.03,lon:12.60,type:'NATO nuclear — F-35A',size:'medium'},{name:'Sigonella, Sicily',lat:37.41,lon:14.92,type:'Naval air station',size:'medium'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen Stealth',count:'1,076+',items:[{n:'F-35A/B/C Lightning II',d:'Multirole stealth — 3 variants, AESA, sensor fusion',c:'~890',dot:'r'},{n:'F-22 Raptor',d:'Air superiority stealth — Mach 2.25, supercruise',c:'186',dot:'r'}]},{icon:'💣',title:'Strategic Bombers',count:'106+',items:[{n:'B-2 Spirit',d:'Flying-wing stealth — nuclear-capable, global range',c:'20',dot:'g'},{n:'B-52H Stratofortress',d:'70,000 lb payload — nuclear/conventional',c:'76',dot:'g'},{n:'B-21 Raider (NEW)',d:'Next-gen stealth bomber — entering service 2025',c:'~10 (IOC)',dot:'r'}]},{icon:'🛩️',title:'4th Gen Fighters',count:'900+',items:[{n:'F-15EX Eagle II',d:'Advanced multirole — 29,500 lb payload',c:'~230',dot:''},{n:'F-16C/D Block 50/70',d:'Light multirole — upgraded AESA variant',c:'~670',dot:''}]},{icon:'🤖',title:'Drones (UAS)',count:'11,000+',items:[{n:'MQ-9 Reaper',d:'Armed MALE drone — Hellfire, GBU-38',c:'300+',dot:'cy'},{n:'RQ-4 Global Hawk',d:'HALE surveillance — 34h endurance',c:'35',dot:''},{n:'MQ-1C Gray Eagle',d:'Army MALE armed ISR',c:'150+',dot:'cy'}]}]},
+naval:{cards:[{icon:'🚢',title:'Aircraft Carriers',count:'11',items:[{n:'Nimitz-class CVN (8)',d:'Nuclear-powered — 75 aircraft, 5,000 crew',c:'8',dot:'r'},{n:'Gerald R. Ford-class (3)',d:'Next-gen CVN — EMALS catapult, 78+ aircraft',c:'3',dot:'r'}]},{icon:'⚓',title:'Cruisers & Destroyers',count:'95',items:[{n:'Arleigh Burke DDG',d:'Aegis BMD — VLS×96, Tomahawk, SM-6',c:'73',dot:''},{n:'Ticonderoga CG',d:'Aegis cruiser — 122-cell VLS',c:'22',dot:''}]},{icon:'🤿',title:'Submarines',count:'65',items:[{n:'Ohio-class SSBN',d:'Ballistic missile — 24× Trident II D5',c:'14',dot:'r'},{n:'Virginia-class SSN',d:'Attack sub — Tomahawk, Mk-48',c:'22',dot:''},{n:'Los Angeles SSN',d:'Attack submarine fleet',c:'29',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'Nuclear ICBMs',count:'400+',items:[{n:'LGM-30G Minuteman III',d:'Silo-launched — 13,000 km, Mach 23',c:'400',dot:'r'},{n:'Trident II D5 SLBM',d:'Sub-launched — 11,300 km, MIRV×8',c:'280+',dot:'r'}]},{icon:'🎯',title:'Cruise Missiles',count:'5,000+',items:[{n:'BGM-109 Tomahawk',d:'1,700 km — terrain following GPS',c:'4,000+',dot:'g'},{n:'AGM-158 JASSM-ER',d:'Stealth air-launched — 1,000 km',c:'1,000+',dot:''},{n:'AGM-158C LRASM',d:'Anti-ship — autonomous, 900 km',c:'400+',dot:''}]},{icon:'⚡',title:'Hypersonic',count:'Deploying',items:[{n:'AGM-183A ARRW',d:'Air-launched — Mach 20 boost-glide',c:'Dev/deploy',dot:'cy'},{n:'LRHW Dark Eagle',d:'Army hypersonic — Mach 17, 2,775 km',c:'Deploying',dot:'cy'}]},{icon:'🛡️',title:'Missile Defense',count:'Multi-layer',items:[{n:'THAAD',d:'Terminal high altitude — ICBM intercept',c:'7 batteries',dot:''},{n:'Patriot PAC-3 MSE',d:'Theater BMD — 35 km intercept altitude',c:'60+ batteries',dot:''},{n:'SM-3 IIA (Aegis)',d:'Ship-based — intercepts MRBMs/ICBMs',c:'~150+',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Main Battle Tanks',count:'~6,612',items:[{n:'M1A2 SEPv3 Abrams',d:'120mm smoothbore, APS Trophy, composite armor',c:'~2,509',dot:''},{n:'M1A2 SEPv2/v1 (reserve)',d:'Older variants in storage',c:'~4,000+',dot:''}]},{icon:'🚗',title:'IFV / APC',count:'~7,000',items:[{n:'M2/M3 Bradley IFV',d:'25mm Bushmaster, TOW missiles',c:'~4,000',dot:''},{n:'Stryker IAV / AMPV',d:'Wheeled APC — 9 variants',c:'~4,400',dot:''}]},{icon:'💥',title:'Artillery',count:'1,300+',items:[{n:'M109A7 Paladin SPH',d:'155mm — 30 km range, automated loading',c:'970+',dot:'g'},{n:'M142 HIMARS',d:'GMLRS (70 km) + ATACMS (300 km)',c:'540+',dot:'g'}]}]},
+tech:{items:['US Cyber Command — 133 Cyber Mission Force teams, world\'s largest cyber military force','JADC2 — AI battlefield network linking all services in real-time across all domains','US Space Force — GPS constellation, X-37B space drone, recon satellites, space weapons','HELIOS Laser (60 kW) deployed on USS Preble — ship-based directed energy weapon','Loyal Wingman / CCA — AI-piloted combat drone wingmen for crewed fighters','Project Maven — AI targeting system using machine learning for ISR analysis','NSA global surveillance — PRISM, XKEYSCORE — Five Eyes intelligence sharing','SOCOM — 73,000+ special operators (Delta, SEAL Team 6, Green Berets) globally deployed']}
+},
+
+russia:{id:'russia',flag:'🇷🇺',name:'Russia',rank:2,nuclear:true,warheads:6257,budget:'$126B',budgetNum:126,personnel:'1.32M',personnelNum:1320000,aircraft:4173,tanks:12950,naval:603,gfp:0.0788,rating:88,
+nuclearNote:'6,257 warheads — World\'s largest nuclear arsenal · Avangard HGV · Poseidon',
+overview:'Russia holds the world\'s largest nuclear arsenal and remains a tier-1 power despite sanctions. It boasts massive land forces, world-leading tank numbers, the S-400/S-500 air defense network, and cutting-edge hypersonic weapons (Kinzhal, Zircon, Avangard). The Ukraine conflict has revealed both its strengths and significant logistical weaknesses.',
+metrics:[{v:'$126B',l:'Defense Budget'},{v:'1.32M',l:'Active Personnel'},{v:'6,257',l:'Nuclear Warheads'},{v:'18',l:'Overseas Installations'},{v:'4,173',l:'Total Aircraft'}],
+success:[{l:'Nuclear Arsenal',v:99,c:'red'},{l:'Land Warfare',v:82,c:'orange'},{l:'Air Defense (S-400/S-500)',v:96,c:'cyan'},{l:'Cyber Warfare',v:90,c:'green'},{l:'Hypersonic Weapons',v:95,c:'purple'},{l:'Naval Power',v:62,c:'cyan'},{l:'Power Projection',v:70,c:'orange'},{l:'Defense Industry',v:78,c:'orange'}],
+pros:['World\'s largest nuclear arsenal (6,257 warheads)','Most advanced air defense systems globally (S-400/S-500)','Leading hypersonic technology: Kinzhal, Zircon, Avangard','Massive armored ground forces (12,950 tanks)','Battle-hardened troops from Chechnya, Syria, Ukraine','Arctic military dominance — Northern Fleet, icebreakers','Advanced electronic warfare (Krasukha-4, Murmansk-BN)'],
+cons:['Economy severely constrained by Western sanctions','Ukraine war revealed deep logistics and morale failures','Aging surface navy — single working carrier undergoing refit','Heavy equipment losses in Ukraine conflict','Defense tech brain drain and corruption in procurement'],
+budget:{total:'$126B',pct:'4.1% of GDP',personnel:'$40B',procurement:'$30B',rd:'$20B',ops:'$36B',note:'Increased 70% since 2022 Ukraine invasion. Real spending may be 20-30% higher due to non-transparent military financing.'},
+tier:'Great Power',
+bases:[{name:'Tartus Naval Base, Syria',lat:34.89,lon:35.87,type:'Only Mediterranean naval base',size:'major'},{name:'Khmeimim AB, Syria',lat:35.40,lon:35.95,type:'Air Force — Middle East hub',size:'major'},{name:'Sevastopol, Crimea',lat:44.60,lon:33.53,type:'Black Sea Fleet HQ',size:'major'},{name:'Gyumri, Armenia',lat:40.79,lon:43.85,type:'102nd Military Base',size:'major'},{name:'Kant AB, Kyrgyzstan',lat:42.85,lon:74.85,type:'CSTO Air Base',size:'major'},{name:'Dushanbe, Tajikistan',lat:38.56,lon:68.77,type:'201st Military Base',size:'major'},{name:'Kaliningrad Enclave',lat:54.70,lon:20.51,type:'Nuclear-armed Iskander-M base',size:'major'},{name:'Gadzhiyevo, Murmansk',lat:69.26,lon:33.03,type:'SSBN Northern Fleet base',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen Stealth',count:'~30',items:[{n:'Su-57 Felon',d:'5th gen stealth — supercruise, internal bays, AESA',c:'~30 (growing)',dot:'r'}]},{icon:'🛩️',title:'4th/4.5 Gen Fighters',count:'700+',items:[{n:'Su-35S Flanker-E',d:'4++ — thrust-vectoring, 3,600 km range',c:'~130',dot:''},{n:'Su-30SM/SM2',d:'Heavy multirole — long range strike',c:'~170',dot:''},{n:'MiG-31BM (Kinzhal carrier)',d:'Interceptor — Kh-47M2 Kinzhal hypersonic launch platform',c:'~130',dot:'g'}]},{icon:'💣',title:'Strategic Bombers',count:'130+',items:[{n:'Tu-160M Blackjack',d:'Supersonic strategic — 12× Kh-102 cruise missiles',c:'16',dot:'g'},{n:'Tu-95MS Bear',d:'Turboprop strategic — Kh-101/102 nuclear',c:'~60',dot:'g'},{n:'Tu-22M3M Backfire',d:'Maritime strike / nuclear bomber',c:'~60',dot:'g'}]},{icon:'🤖',title:'Combat Drones',count:'100+',items:[{n:'Geran-2 (Shahed-136)',d:'Iranian-design loitering munition — used extensively in Ukraine',c:'1,000s procured',dot:'r'},{n:'Orion UCAV',d:'Russian MALE combat drone',c:'~20',dot:''},{n:'S-70 Okhotnik UCAV',d:'Stealth flying-wing — testing phase',c:'Testing',dot:'r'}]}]},
+naval:{cards:[{icon:'🚢',title:'Capital Ships',count:'1+',items:[{n:'Admiral Kuznetsov',d:'Under major refit — Su-33/MiG-29K air wing',c:'1 (refit)',dot:'g'}]},{icon:'🤿',title:'Submarines',count:'64',items:[{n:'Borei-A class SSBN',d:'16× Bulava SLBM (MIRV) — nuclear',c:'4 (+4 building)',dot:'r'},{n:'Yasen-M SSGN',d:'Kalibr / Zircon cruise missiles',c:'5',dot:''},{n:'Oscar II SSGN',d:'P-700 Granit anti-ship missiles',c:'4',dot:''}]},{icon:'⚓',title:'Surface Combatants',count:'~100',items:[{n:'Kirov-class Battlecruiser',d:'Nuclear-powered — largest warship in service globally',c:'1',dot:'g'},{n:'Slava-class Cruiser',d:'16× P-500/P-1000 SSMs + S-300F',c:'2',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'ICBMs',count:'350+',items:[{n:'RS-28 Sarmat ("Satan II")',d:'18,000 km, MIRV×10, Avangard glide vehicle',c:'Deploying',dot:'r'},{n:'RS-24 Yars',d:'Road/silo — 11,000 km, MIRV×6',c:'~190',dot:'r'},{n:'RT-2PM2 Topol-M',d:'Silo/road — 11,000 km',c:'~60',dot:'r'}]},{icon:'⚡',title:'Hypersonic',count:'Deployed',items:[{n:'Kh-47M2 Kinzhal',d:'Air-launched — Mach 10+, 2,000 km',c:'~80+',dot:'cy'},{n:'3M22 Zircon',d:'Ship/sub-launched — Mach 9, 1,000 km',c:'Deployed',dot:'cy'},{n:'Avangard HGV',d:'ICBM-launched glide — Mach 27',c:'6 deployed',dot:'cy'}]},{icon:'🎯',title:'Cruise Missiles',count:'1,000+',items:[{n:'Kalibr 3M14T/L',d:'Ship/sub-launched — 2,500 km, GPS precision',c:'Hundreds',dot:''},{n:'Kh-101/102',d:'Air-launched stealth — 5,500 km / nuclear variant',c:'Hundreds',dot:'g'}]},{icon:'🛡️',title:'Air Defense',count:'Hundreds',items:[{n:'S-400 Triumf',d:'400 km range — 40+ batteries deployed',c:'40+ batteries',dot:''},{n:'S-500 Prometheus',d:'Can engage low-orbit satellites — deploying now',c:'~10 systems',dot:'r'},{n:'Iskander-M SRBM',d:'500 km quasi-ballistic — nuclear capable',c:'~150 launchers',dot:'g'}]}]},
+ground:{cards:[{icon:'🛡️',title:'Main Battle Tanks',count:'12,950',items:[{n:'T-14 Armata (limited)',d:'Next-gen — unmanned turret, active protection',c:'~30 (trials)',dot:'r'},{n:'T-90M Proryv',d:'125mm autoloaded, Relikt ERA, Arena APS',c:'~1,000',dot:''},{n:'T-72B3M / T-80BVM',d:'Upgraded legacy tanks — backbone of fleet',c:'~9,000+',dot:''}]},{icon:'💥',title:'Artillery & MLRS',count:'6,000+',items:[{n:'2S19M2 Msta-S SPH',d:'152mm — 30 km range',c:'~1,900',dot:'g'},{n:'BM-30 Smerch / Tornado-G',d:'300mm MLRS — 90 km range',c:'~400',dot:'g'},{n:'2S35 Koalitsiya-SV',d:'152mm — 70 km range, new system',c:'~50+',dot:'r'}]}]},
+tech:{items:['GRU Unit 26165 — attributed to SolarWinds, NotPetya, DNC hacks, election interference globally','Electronic Warfare: Krasukha-4 / Murmansk-BN — can suppress NATO radar 5,000 km away','GLONASS — Russian GPS constellation, military precision mode','Perimeter ("Dead Hand") — automated nuclear launch system still operational','Poseidon nuclear-armed autonomous underwater torpedo — 100+ megaton, intercontinental range','Kompella-M imagery satellite constellation — military reconnaissance','SVR/FSB cyber division — global intelligence network, active in 100+ nations']}
+},
+
+china:{id:'china',flag:'🇨🇳',name:'China',rank:3,nuclear:true,warheads:600,budget:'$314B',budgetNum:314,personnel:'2.03M',personnelNum:2030000,aircraft:3304,tanks:5000,naval:730,gfp:0.0788,rating:91,
+nuclearNote:'~600 warheads (rapidly expanding) — target 1,000+ by 2030',
+overview:'China fields the world\'s largest active military force. The PLA is modernizing at unprecedented speed: 3 carriers, J-20 stealth, DF-17 hypersonic missiles, and the world\'s largest navy by vessel count. Its nuclear arsenal is rapidly expanding. China is closing the gap with the US across nearly every domain.',
+metrics:[{v:'$314B',l:'Defense Budget'},{v:'2.03M',l:'Active Personnel'},{v:'600+',l:'Warheads (growing)'},{v:'~730',l:'Naval Vessels'},{v:'3,304',l:'Total Aircraft'}],
+success:[{l:'Naval Buildup Rate',v:97,c:'cyan'},{l:'Missile Arsenal (A2/AD)',v:96,c:'red'},{l:'Air Force Modernization',v:88,c:'orange'},{l:'Cyber Warfare',v:93,c:'green'},{l:'Nuclear Expansion',v:91,c:'red'},{l:'Space Capabilities',v:88,c:'purple'},{l:'Ground Forces',v:85,c:'orange'},{l:'Drone Production',v:95,c:'cyan'}],
+pros:['World\'s largest active military (2.03M)','Fastest naval expansion in history — 3 carriers','DF-17/DF-21D "carrier-killer" missiles dominate Western Pacific','Massive state-sponsored cyber program (APT1, APT41, Volt Typhoon)','Rapidly expanding nuclear arsenal — 600 → 1,000 warheads by 2030','World\'s largest drone production capacity — CASC, CETC','A2/AD bubble makes Western Pacific operations extremely costly for US'],
+cons:['No meaningful combat experience since 1979 Sino-Vietnamese war','Single overseas base (Djibouti) — limited power projection','Taiwan Strait crossing remains a massive military challenge','Relatively weak anti-submarine warfare capability','Possible quality gaps in newer systems without combat testing'],
+budget:{total:'$314B',pct:'1.7% of GDP',personnel:'$90B',procurement:'$80B',rd:'$60B',ops:'$84B',note:'Growing ~7% annually. Real budget is likely 30-50% higher due to non-transparent extra-budgetary spending. Target is $400B+ by 2030.'},
+tier:'Near-Peer',
+bases:[{name:'Djibouti Naval Base',lat:11.52,lon:43.10,type:'China\'s only official overseas base',size:'major'},{name:'Woody Island, Paracels',lat:16.84,lon:112.34,type:'Air Force/Navy — disputed South China Sea',size:'major'},{name:'Fiery Cross Reef, Spratlys',lat:9.55,lon:114.23,type:'Artificial island — runways, hangars',size:'major'},{name:'Mischief Reef, Spratlys',lat:9.91,lon:115.53,type:'Naval facility — artificial island',size:'major'},{name:'Yulin Naval Base, Hainan',lat:18.22,lon:109.58,type:'SSBN fleet — underground tunnels',size:'major'},{name:'Zhanjiang, South Sea Fleet HQ',lat:21.18,lon:110.40,type:'South Sea Fleet command',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen Stealth',count:'200+',items:[{n:'J-20 Mighty Dragon',d:'Stealth multirole — AESA radar, internal bays',c:'~200+',dot:'r'},{n:'J-35 (FC-31) Carrier',d:'Carrier-based stealth — entering service 2024-25',c:'Entering service',dot:'r'}]},{icon:'🛩️',title:'4th/4.5 Gen',count:'800+',items:[{n:'J-16 Heavy Multirole',d:'Su-30 derivative — AESA, 12 hardpoints',c:'~200+',dot:''},{n:'J-10C',d:'Light multirole — AESA, PL-15 BVR',c:'~300',dot:''},{n:'J-11B/D (Flanker)',d:'Air superiority — domestic Su-27',c:'~300',dot:''}]},{icon:'💣',title:'Bombers',count:'230+',items:[{n:'H-6K/N/J Bomber',d:'Nuclear-capable — 6× CJ-20 cruise or YJ-12',c:'~230',dot:'g'}]},{icon:'🤖',title:'Drones',count:'1,000+',items:[{n:'Wing Loong II UCAV',d:'Armed MALE — comparable to MQ-9 Reaper',c:'~200+',dot:'cy'},{n:'CH-5 Rainbow UCAV',d:'MALE — anti-ship/strike missions',c:'~100+',dot:'cy'}]}]},
+naval:{cards:[{icon:'🚢',title:'Aircraft Carriers',count:'3',items:[{n:'Fujian (Type 003)',d:'EMALS catapult — J-35 capable, 80,000 tons',c:'1',dot:'r'},{n:'Shandong (Type 002)',d:'STOBAR — J-15 wing',c:'1',dot:''},{n:'Liaoning (Type 001)',d:'Training/combat — J-15 wing',c:'1',dot:''}]},{icon:'⚓',title:'Destroyers',count:'50+',items:[{n:'Type 055 Renhai Cruiser',d:'112-cell VLS — YJ-21 hypersonic, world-class',c:'8',dot:'r'},{n:'Type 052D Destroyer',d:'64-cell VLS — AESA, vertically-launched',c:'25+',dot:''}]},{icon:'🤿',title:'Submarines',count:'60+',items:[{n:'Type 094 Jin SSBN',d:'12× JL-2/JL-3 nuclear SLBMs',c:'6',dot:'r'},{n:'Type 093/095 Shang SSN',d:'Attack sub — YJ-18 ASCM',c:'~12',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'ICBMs',count:'200+',items:[{n:'DF-41',d:'Road-mobile — 14,000 km, MIRV×10',c:'~100',dot:'r'},{n:'DF-5B',d:'Silo — 13,000 km, MIRV capable',c:'~20',dot:'r'},{n:'DF-31AG',d:'Mobile ICBM — 11,200 km',c:'~72',dot:'r'}]},{icon:'⚡',title:'Hypersonic',count:'300+',items:[{n:'DF-17 HGV',d:'Mach 5-10 glide vehicle — 2,500 km',c:'~200',dot:'cy'},{n:'YJ-21 (Ship-launched)',d:'Mach 10+ anti-ship — Type 055 deployed',c:'Deployed',dot:'cy'}]},{icon:'🎯',title:'Anti-Ship / ASBM',count:'400+',items:[{n:'DF-21D ASBM',d:'"Carrier killer" — 1,500 km, Mach 10 terminal',c:'~100',dot:'g'},{n:'DF-26 IRBM',d:'4,000 km — nuclear/conventional, dual role',c:'~200',dot:'g'}]}]},
+ground:{cards:[{icon:'🛡️',title:'Main Battle Tanks',count:'~5,000',items:[{n:'Type 99A',d:'125mm autoloader, ERA, APS',c:'~1,200',dot:''},{n:'Type 96A/B',d:'Main service tank',c:'~2,500',dot:''},{n:'Type 15 Light MBT',d:'Lightweight — high altitude, alpine warfare',c:'~400+',dot:''}]},{icon:'💥',title:'Artillery',count:'3,800+',items:[{n:'PLZ-05A / PCL-181 SPH',d:'155mm tracked/wheeled — 50 km range',c:'~1,700',dot:'g'},{n:'PHL-191 MLRS',d:'300mm — MRLS/tactical ballistic hybrid',c:'~400',dot:'g'}]}]},
+tech:{items:['PLA Strategic Support Force — space, cyber, EW as dedicated service branch','APT41 / Volt Typhoon — elite state-sponsored hackers targeting US critical infrastructure','Beidou Navigation System — Chinese GPS with military precision, global coverage','FAST Telescope — world\'s largest radio dish, dual military intelligence use','Tiangong Space Station — military research capability in orbit','AI Battlefield Command — Blue Dragon C2 system using machine learning','Quantum communication satellite Micius — theoretically unhackable military comms','DF-ZF Hypersonic Glide Vehicle — most advanced in Chinese inventory']}
+},
+
+india:{id:'india',flag:'🇮🇳',name:'India',rank:4,nuclear:true,warheads:172,budget:'$75B',budgetNum:75,personnel:'1.45M',personnelNum:1450000,aircraft:2182,tanks:4614,naval:295,gfp:0.1023,rating:82,
+nuclearNote:'~160-180 warheads — No First Use policy — Nuclear Triad (emerging)',
+overview:'India is the 4th most powerful military globally. Facing dual threats from China and Pakistan, India is rapidly modernizing through Make in India: Tejas, Arjun MBT, BrahMos. It operates 2 aircraft carriers, a growing nuclear triad, and is transitioning from world\'s largest arms importer toward self-reliance.',
+metrics:[{v:'$75B+',l:'Defense Budget'},{v:'1.45M',l:'Active Personnel'},{v:'160-180',l:'Nuclear Warheads'},{v:'2',l:'Aircraft Carriers'},{v:'2,182',l:'Total Aircraft'}],
+success:[{l:'Land Warfare',v:87,c:'orange'},{l:'Nuclear Deterrence',v:80,c:'red'},{l:'Naval Power',v:78,c:'cyan'},{l:'Missile Technology',v:85,c:'orange'},{l:'Counter-terrorism',v:88,c:'green'},{l:'Air Force',v:79,c:'orange'},{l:'Space / ASAT',v:75,c:'purple'},{l:'Defence Industry',v:65,c:'green'}],
+pros:['2nd largest standing army (1.45M active + 1.15M reserve)','BrahMos — world\'s fastest operational cruise missile (Mach 3)','Rafale + Su-30MKI — formidable combination in air','Nuclear triad emerging: Agni-V + sea-based + air-delivered','ISRO ASAT — demonstrated satellite kill in 2019 (Mission Shakti)','Battle-tested in Siachen, Kargil, and continuous counter-insurgency'],
+cons:['Heavy dependence on foreign arms imports (world\'s largest importer)','Slow indigenous development — Tejas and Arjun both faced major delays','Two-front war scenario with China+Pakistan simultaneously is difficult','Much of equipment is aging Soviet-era hardware','Inter-service coordination gaps remain a challenge'],
+budget:{total:'$75B',pct:'2.4% of GDP',personnel:'$35B',procurement:'$18B',rd:'$8B',ops:'$14B',note:'Rapidly increasing — $130B+ planned by 2030. Still heavily dependent on imports (60%+ of major arms).'},
+tier:'Regional Power',
+bases:[{name:'INS Karwar — Project Seabird',lat:14.80,lon:74.13,type:'India\'s largest naval base',size:'major'},{name:'Port Blair, Andaman & Nicobar',lat:11.66,lon:92.75,type:'Strategic island chain — Indian Ocean',size:'major'},{name:'Leh Airbase, Ladakh',lat:34.14,lon:77.55,type:'Air Force — China border forward',size:'major'},{name:'Tezpur, Assam',lat:26.72,lon:92.78,type:'Air Force — Northeast border',size:'major'},{name:'Bhuj, Gujarat',lat:23.29,lon:69.67,type:'Air Force — Pakistan front',size:'major'},{name:'Thanjavur, Tamil Nadu',lat:10.72,lon:79.10,type:'Air Force — Indian Ocean',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'Frontline Fighters',count:'350+',items:[{n:'Rafale F3-R',d:'4.5-gen — SCALP, Meteor BVR, SPECTRA EW',c:'36 (+26 ordered)',dot:'r'},{n:'Su-30MKI',d:'Heavy multirole — BrahMos capable',c:'~260',dot:''}]},{icon:'🛩️',title:'4th Gen',count:'300+',items:[{n:'HAL Tejas Mk1A',d:'Indigenous LCA — AESA, 83 ordered',c:'~40 (+83 on order)',dot:'r'},{n:'MiG-29UPG / Mirage 2000',d:'Upgraded 4th gen — nuclear capable',c:'~115',dot:'g'}]},{icon:'🚁',title:'Attack Helicopters',count:'80+',items:[{n:'HAL LCH Prachand',d:'Indigenous attack — high altitude (Siachen)',c:'~75',dot:'cy'},{n:'Apache AH-64E',d:'US-supplied — Longbow, Hellfire',c:'22',dot:'cy'}]}]},
+naval:{cards:[{icon:'🚢',title:'Carriers',count:'2',items:[{n:'INS Vikrant (IAC-1)',d:'Indigenous — MiG-29K, 45,000 tons',c:'1',dot:'r'},{n:'INS Vikramaditya',d:'Ex-Gorshkov STOBAR — MiG-29K wing',c:'1',dot:''}]},{icon:'🤿',title:'Submarines',count:'21',items:[{n:'INS Arihant-class SSBN',d:'Nuclear — K-15 Sagarika or K-4 SLBMs',c:'2 (+2 building)',dot:'r'},{n:'Scorpene (Kalvari) SSK',d:'French design — AIP propulsion',c:'5',dot:''}]},{icon:'⚓',title:'Destroyers',count:'25+',items:[{n:'Kolkata / Visakhapatnam DDG',d:'Indigenous — BrahMos×16, Barak-8 SAM',c:'7',dot:''},{n:'Shivalik / Talwar Frigate',d:'Multirole — stealth features',c:'~10',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'Ballistic Missiles',count:'150+',items:[{n:'Agni-V ICBM',d:'5,000-8,000 km — MIRV capable, nuclear',c:'~50+',dot:'r'},{n:'Agni-IV IRBM',d:'4,000 km — road mobile, nuclear',c:'~20+',dot:'r'}]},{icon:'🎯',title:'Cruise Missiles',count:'Hundreds',items:[{n:'BrahMos (Mach 3)',d:'Air/ship/land — 400+ km, world fastest cruise',c:'Hundreds',dot:'cy'},{n:'Nirbhay LACM',d:'Subsonic stealth — 1,000 km',c:'~50+',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Main Battle Tanks',count:'4,614',items:[{n:'T-90S Bhishma',d:'125mm, ERA, anti-drone slat armor',c:'~1,600',dot:''},{n:'Arjun Mk1A',d:'Indigenous — 120mm rifled, Kanchan armor',c:'~124',dot:'r'},{n:'T-72M1 Ajeya',d:'Upgraded T-72 — composite armor',c:'~2,500',dot:''}]},{icon:'💥',title:'Artillery',count:'4,000+',items:[{n:'K9 Vajra-T SPH',d:'155mm — localized K9 Thunder',c:'~250',dot:'g'},{n:'Dhanush 155mm',d:'Indigenous towed howitzer',c:'~100+',dot:'g'}]}]},
+tech:{items:['DRDO — 52 laboratories, $2B+ budget, developing Agni-VI ICBM, Tejas Mk2, AMCA','ISRO ASAT (Mission Shakti 2019) — destroyed satellite at 300 km altitude in 3 minutes','NTRO — cyber intelligence agency, growing offensive cyber capacity','BrahMos-NG hypersonic: Mach 8+ under joint development with Russia','AEW&CS Netra — indigenous airborne early warning & control system','Project 75I — AIP submarines with VLS capability under development']}
+},
+
+skorea:{id:'skorea',flag:'🇰🇷',name:'South Korea',rank:5,nuclear:false,warheads:0,budget:'$47.6B',budgetNum:47.6,personnel:'500K',personnelNum:500000,aircraft:1649,tanks:2600,naval:234,gfp:0.1656,rating:80,
+nuclearNote:null,
+overview:'South Korea maintains one of Asia\'s most technologically advanced militaries. Existential necessity — bordering nuclear North Korea — drives constant high readiness. The ROK is now a major defense exporter: K2 tank, K9 howitzer, KF-21 fighter. US-ROK Combined Forces Command provides the nuclear umbrella.',
+metrics:[{v:'$47.6B',l:'Defense Budget'},{v:'500K',l:'Active Personnel'},{v:'US Nuclear Umbrella',l:'Deterrence'},{v:'1,649',l:'Total Aircraft'},{v:'2,600+',l:'Total Tanks'}],
+success:[{l:'Conventional Land Power',v:88,c:'orange'},{l:'Air Force Quality',v:85,c:'orange'},{l:'Naval Capability',v:82,c:'cyan'},{l:'Missile Arsenal',v:80,c:'red'},{l:'Defense Industry Export',v:88,c:'green'},{l:'US Alliance Value',v:95,c:'purple'},{l:'Readiness Level',v:93,c:'red'},{l:'Technology Level',v:89,c:'cyan'}],
+pros:['K2 Black Panther — arguably world\'s most advanced production MBT','Aegis destroyers with SM-3 Block IIA BMD capability','KF-21 Boramae indigenous 4.5-gen fighter (first flight 2022)','World\'s most exported SPH: K9 Thunder (18 nations)','Hyunmoo-5 bunker buster — 8-ton warhead vs DPRK underground bases','Strong US alliance: 28,500 US troops permanently stationed','Kill Chain + KMPR: pre-emptive and massive retaliation doctrines'],
+cons:['No nuclear weapons — fully dependent on US extended deterrence','Seoul only 50 km from DPRK border — extremely exposed capital','Mandatory conscription creates quality vs quantity tension','Single-threat focus limits expeditionary capability','Limited overseas power projection capability'],
+budget:{total:'$47.6B',pct:'2.8% of GDP',personnel:'$18B',procurement:'$12B',rd:'$6B',ops:'$11B',note:'Steadily increasing as DPRK threat grows. Targets 3% GDP. Major defense exporter with $17B in exports (2023).'},
+tier:'Regional Power',
+bases:[{name:'Camp Humphreys, Pyeongtaek',lat:36.97,lon:127.03,type:'US-ROK Army HQ — largest US overseas base',size:'major'},{name:'Osan Air Base',lat:37.09,lon:127.03,type:'USAF + ROKAF joint base',size:'major'},{name:'Busan Naval Base',lat:35.10,lon:129.04,type:'Republic of Korea Navy HQ',size:'major'},{name:'Daegu Air Base',lat:35.87,lon:128.65,type:'ROKAF Air Operations',size:'major'},{name:'Jeju Naval Base',lat:33.24,lon:126.56,type:'Southern sea defense hub',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen',count:'40',items:[{n:'F-35A Lightning II',d:'Stealth multirole — nuclear delivery capable',c:'40 (+20 ordered)',dot:'r'}]},{icon:'🛩️',title:'4th/4.5 Gen',count:'400+',items:[{n:'KF-21 Boramae',d:'Indigenous 4.5-gen — AESA, Meteor, entering service',c:'120 planned',dot:'r'},{n:'F-15K Slam Eagle',d:'Heavy strike — Taurus KEPD 350 cruise missile',c:'59',dot:'g'},{n:'KF-16C/D',d:'Light multirole combat aircraft',c:'~180',dot:''}]}]},
+naval:{cards:[{icon:'⚓',title:'Destroyers',count:'12',items:[{n:'Sejong the Great DDG',d:'Aegis — 128-cell VLS, SM-3 IIA BMD',c:'3',dot:'r'},{n:'KDX-II / KDX-I',d:'Guided-missile destroyers',c:'9',dot:''}]},{icon:'🤿',title:'Submarines',count:'18',items:[{n:'Chang Bogo-III (KSS-III)',d:'AIP — 6× VLS for Hyunmoo-3C LACM',c:'3 (+3 building)',dot:'r'},{n:'Son Wonyi (KSS-II)',d:'Type 214 — AIP technology',c:'9',dot:''}]}]},
+missiles:{cards:[{icon:'💥',title:'Ballistic Missiles',count:'Hundreds',items:[{n:'Hyunmoo-5',d:'8-9 ton warhead — destroys underground DPRK command',c:'Deployed',dot:'r'},{n:'Hyunmoo-2C SRBM',d:'800 km — covers all DPRK territory',c:'Hundreds',dot:''},{n:'Hyunmoo-4',d:'500 km, 2-ton warhead, high accuracy',c:'Deployed',dot:''}]},{icon:'🎯',title:'Cruise Missiles',count:'300+',items:[{n:'Taurus KEPD 350',d:'500+ km stealth — precision bunker buster',c:'~170',dot:'cy'},{n:'Hyunmoo-3 LACM',d:'500-1,500 km range land attack',c:'~300',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'2,600+',items:[{n:'K2 Black Panther MBT',d:'120mm smoothbore, APS, world-class FCS',c:'~260 (+700 more)',dot:'r'},{n:'K1A2',d:'Korean Abrams-derivative',c:'~1,500',dot:''}]},{icon:'💥',title:'Artillery',count:'1,400+',items:[{n:'K9A2 Thunder SPH',d:'155mm — world\'s most exported SPH',c:'~1,000+',dot:'r'},{n:'K239 Chunmoo MLRS',d:'239mm rocket artillery system',c:'~200',dot:'g'}]}]},
+tech:{items:['Kill Chain — pre-emptive strike system targeting DPRK launchers before launch','KMPR (Korea Massive Punishment & Retaliation) doctrine — decapitation strikes','ADD (Agency for Defense Development) — $3B annual R&D budget','L-SAM (Long-range SAM) — Korean THAAD equivalent under final development','KAMD (Korea Air & Missile Defense) — multi-layer integrated BMD','KF-21 Boramae AESA radar — indigenously developed active electronically scanned array']}
+},
+
+uk:{id:'uk',flag:'🇬🇧',name:'United Kingdom',rank:6,nuclear:true,warheads:225,budget:'$73B',budgetNum:73,personnel:'149K',personnelNum:149000,aircraft:733,tanks:227,naval:75,gfp:0.1785,rating:78,
+nuclearNote:'~225 warheads · Trident II D5 · Continuous at-sea deterrent since 1969',
+overview:'The UK punches far above its weight: world-class special forces (SAS/SBS), independent nuclear capability (Trident), two F-35B-capable carriers, and deep NATO/Five Eyes integration. Founding AUKUS member. Permanent UN Security Council member. Despite 149,000 active troops, the UK maintains genuine global expeditionary reach.',
+metrics:[{v:'$73B',l:'Defense Budget'},{v:'149K',l:'Active Personnel'},{v:'~225',l:'Nuclear Warheads'},{v:'733',l:'Total Aircraft'},{v:'2',l:'Carrier Strike Groups'}],
+success:[{l:'Special Forces Quality',v:98,c:'green'},{l:'Nuclear Deterrence',v:82,c:'red'},{l:'Naval Capability',v:82,c:'cyan'},{l:'Intelligence (GCHQ)',v:95,c:'purple'},{l:'Air Power',v:79,c:'orange'},{l:'Carrier Strike Groups',v:80,c:'cyan'},{l:'Alliance Leadership',v:88,c:'purple'},{l:'Expeditionary Warfare',v:85,c:'orange'}],
+pros:['22 SAS, SBS — world\'s elite tier-1 special forces','GCHQ / NSA / Five Eyes — premier intelligence alliance','Two F-35B carrier strike groups (Queen Elizabeth class)','Continuous at-sea nuclear deterrent since 1969','Astute SSN — among world\'s quietest attack submarines','Storm Shadow / Brimstone — world-leading precision munitions','AUKUS: next-gen submarine tech sharing with US and Australia'],
+cons:['Small active force — 149,000 and shrinking under budget pressure','Only 227 Challenger tanks — far fewer than peer nations','Cannot sustain a major land campaign without allies','Relies heavily on US for strategic ISR and logistics enablers','Budget pressures have delayed Carrier Strike Group readiness'],
+budget:{total:'$73B',pct:'2.3% of GDP',personnel:'$28B',procurement:'$18B',rd:'$12B',ops:'$15B',note:'Pledged to increase to 2.5% GDP by 2030. AUKUS nuclear submarine program adds £3B+ annually.'},
+tier:'Major Power',
+bases:[{name:'HMNB Portsmouth',lat:50.80,lon:-1.11,type:'Royal Navy HQ — home of carriers',size:'major'},{name:'RAF Akrotiri, Cyprus',lat:34.58,lon:32.99,type:'Air Force — Middle East hub',size:'major'},{name:'BFSAI Diego Garcia',lat:-7.31,lon:72.41,type:'Joint UK-US — Indian Ocean',size:'major'},{name:'Gibraltar',lat:36.14,lon:-5.35,type:'Naval base — Mediterranean gateway',size:'major'},{name:'Mount Pleasant, Falklands',lat:-51.82,lon:-58.45,type:'Air/Army — South Atlantic',size:'major'},{name:'Brunei Garrison',lat:4.94,lon:114.95,type:'Army — SE Asia forward',size:'medium'},{name:'RAF Brize Norton, UK',lat:51.75,lon:-1.58,type:'Strategic airlift hub',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen',count:'47+',items:[{n:'F-35B Lightning II (STOVL)',d:'Carrier and land-based — 138 total ordered',c:'~47 (138 total order)',dot:'r'}]},{icon:'🛩️',title:'4th/4.5 Gen',count:'160+',items:[{n:'Eurofighter Typhoon FGR4',d:'Meteor BVR, Brimstone, Storm Shadow capable',c:'~160',dot:''},{n:'GCAP 6th Gen',d:'UK-Japan-Italy next-gen — service ~2035',c:'Development',dot:'r'}]},{icon:'🚁',title:'Attack Helicopters',count:'50+',items:[{n:'Apache AH-64E',d:'Longbow radar, Hellfire missiles',c:'50',dot:'cy'}]}]},
+naval:{cards:[{icon:'🚢',title:'Carriers',count:'2',items:[{n:'HMS Queen Elizabeth R08',d:'65,000-ton CVF — 36× F-35B per deployment',c:'1',dot:'r'},{n:'HMS Prince of Wales R09',d:'65,000-ton CVF — F-35B capable',c:'1',dot:'r'}]},{icon:'🤿',title:'Submarines',count:'10',items:[{n:'Vanguard-class SSBN',d:'Nuclear — 16× Trident II D5 — CASD',c:'4',dot:'r'},{n:'Astute-class SSN',d:'Attack sub — Tomahawk TLAM, Spearfish torpedo',c:'5 (+2)',dot:''}]},{icon:'⚓',title:'Destroyers & Frigates',count:'19',items:[{n:'Type 45 Daring DDG',d:'Aster 30 SAM — world-best air defense destroyer',c:'6',dot:'g'},{n:'Type 23 Duke Frigate',d:'ASW focus — Merlin helicopter, Sea Ceptor SAM',c:'13',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'Nuclear',count:'~225 warheads',items:[{n:'Trident II D5 SLBM',d:'11,300 km — up to 8 MIRVs per missile',c:'~48 deployed',dot:'r'}]},{icon:'🎯',title:'Precision Strike',count:'1,000+',items:[{n:'Storm Shadow / SCALP',d:'560 km stealth cruise — Typhoon/F-35 launched',c:'~900',dot:''},{n:'Brimstone 3',d:'Anti-armor / drone killer — 60 km',c:'Hundreds',dot:'cy'},{n:'Meteor BVRAAM',d:'200+ km BVR — ramjet, no-escape zone',c:'Hundreds',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'~660 AFV',items:[{n:'Challenger 3 MBT',d:'120mm L30A1 rifled, Trophy APS — upgraded',c:'~148',dot:''},{n:'Ajax FRES Scout',d:'Next-gen IFV — delayed, entering service',c:'~300+',dot:'r'},{n:'AS-90 / M109A2 SPH',d:'155mm self-propelled howitzer',c:'~89',dot:'g'}]}]},
+tech:{items:['GCHQ — world\'s premier SIGINT agency — NSA partner — intercepts petabytes daily','National Cyber Force (NCF) — GCHQ + MI6 + MOD offensive cyber operations','Skynet 6 — UK military satellite communication constellation','Project MORPHEUS — tactical cloud and AI battlefield management platform','AUKUS Pillar II — AI, quantum sensing, undersea, directed energy tech sharing','Dstl — Defence Science & Technology Lab: hypersonics, directed energy, AI weapons R&D']}
+},
+
+japan:{id:'japan',flag:'🇯🇵',name:'Japan (JSDF)',rank:7,nuclear:false,warheads:0,budget:'$50B',budgetNum:50,personnel:'247K',personnelNum:247000,aircraft:1449,tanks:1004,naval:155,gfp:0.1839,rating:76,
+nuclearNote:null,
+overview:'Japan\'s Self-Defense Forces are constitutionally constrained but technologically elite. Facing China and DPRK threats, Japan doubled its defense budget to 2% GDP by 2027. Japan fields exceptional Aegis BMD destroyers, F-35B-capable flat-top carriers, and is co-developing the 6th-gen GCAP fighter with UK and Italy.',
+metrics:[{v:'$50B+',l:'Defense Budget'},{v:'247K',l:'Active Personnel'},{v:'None (Article 9)',l:'Nuclear Status'},{v:'1,449',l:'Total Aircraft'},{v:'155',l:'Naval Vessels'}],
+success:[{l:'Naval Technology',v:90,c:'cyan'},{l:'Aegis BMD Capability',v:96,c:'red'},{l:'Undersea Warfare',v:87,c:'cyan'},{l:'Defense Industry',v:82,c:'green'},{l:'US Alliance Value',v:97,c:'purple'},{l:'Air Power Quality',v:80,c:'orange'},{l:'Island Defense',v:88,c:'orange'},{l:'Cyber (emerging)',v:65,c:'green'}],
+pros:['World-class Aegis BMD destroyers (SM-3 IIA can intercept ICBMs)','Soryu/Taigei subs — among quietest diesel-electric submarines globally','F-35B-capable flat-top carriers (Izumo/Kaga converted)','GCAP 6th-gen fighter development with UK and Italy','Doubling defense budget: 1% → 2% GDP by 2027','Exceptional sensor fusion and C4ISR systems'],
+cons:['Constitutional Article 9 — historically no offensive capability (being reinterpreted)','Small active force: only 247,000 personnel','No nuclear weapons — fully dependent on US deterrence','Limited long-range power projection until recently','Geography: islands spread across 3,000 km — hard to defend uniformly'],
+budget:{total:'$50B',pct:'1.0% → 2.0% GDP',personnel:'$20B',procurement:'$15B',rd:'$8B',ops:'$7B',note:'Doubling from 1% to 2% GDP by 2027. Target $80B+. 5-year defense plan worth $315B total.'},
+tier:'Regional Power',
+bases:[{name:'MSDF Yokosuka Naval Base',lat:35.28,lon:139.67,type:'Navy HQ + US 7th Fleet',size:'major'},{name:'JASDF Misawa AB',lat:40.70,lon:141.37,type:'Air Force + USAF joint',size:'major'},{name:'JASDF Naha, Okinawa',lat:26.20,lon:127.65,type:'1st line response — China/Taiwan',size:'major'},{name:'MSDF Kure Naval Base',lat:34.24,lon:132.57,type:'Submarine base',size:'major'},{name:'JASDF Chitose (Hokkaido)',lat:42.79,lon:141.66,type:'Air Force — Russia border',size:'major'},{name:'Myako Island base',lat:24.77,lon:125.29,type:'Missile battery — South China Sea area',size:'medium'}],
+aircraft:{cards:[{icon:'✈️',title:'5th Gen',count:'42+',items:[{n:'F-35A (land-based)',d:'41 operational + more arriving annually',c:'41+',dot:'r'},{n:'F-35B (carrier-based)',d:'For Izumo/Kaga flat-top conversion',c:'42 ordered',dot:'r'}]},{icon:'🛩️',title:'4th Gen',count:'250+',items:[{n:'F-15J/DJ (Upgraded)',d:'Air superiority — JSM anti-ship capable',c:'~155',dot:''},{n:'F-2A/B',d:'Co-developed with US — XASM-3 hypersonic capable',c:'~94',dot:''}]},{icon:'💣',title:'Future: GCAP 6th Gen',count:'Dev',items:[{n:'F-X / GCAP Fighter',d:'UK/Italy/Japan — AI-driven, stealth, service 2035',c:'Development',dot:'r'}]}]},
+naval:{cards:[{icon:'🚢',title:'Flat-top Carriers',count:'2',items:[{n:'JS Izumo DDH (converted)',d:'F-35B capable — STOVL carrier operations',c:'1',dot:'r'},{n:'JS Kaga DDH (converting)',d:'F-35B conversion ongoing',c:'1',dot:'r'}]},{icon:'⚓',title:'Aegis Destroyers',count:'8',items:[{n:'Maya-class DDG',d:'SM-3 IIA BMD — can intercept ICBMs in boost phase',c:'2',dot:'r'},{n:'Atago / Kongo DDG',d:'Aegis BMD — SM-3 capability',c:'6',dot:''}]},{icon:'🤿',title:'Submarines',count:'22',items:[{n:'Taigei-class (Li-ion battery)',d:'Newest — very quiet, extended endurance',c:'3',dot:'r'},{n:'Soryu-class SSK',d:'AIP Stirling engine — world-class quiet',c:'11',dot:''}]}]},
+missiles:{cards:[{icon:'🎯',title:'Stand-off Strike (NEW)',count:'1,000+ planned',items:[{n:'Type 12 Extended Range',d:'1,000+ km — new counterattack capability',c:'Deploying 2026',dot:'r'},{n:'XASM-3 Hypersonic ASM',d:'Air-launched Mach 3+ anti-ship',c:'Testing',dot:'cy'}]},{icon:'🛡️',title:'Missile Defense',count:'Multi-layer',items:[{n:'SM-3 Block IIA (Aegis)',d:'Exo-atmospheric ICBM intercept',c:'Deployed',dot:'r'},{n:'PAC-3 MSE',d:'Terminal defense — intercepts TBMs',c:'~24 batteries',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'~1,600 AFV',items:[{n:'Type 10 MBT',d:'120mm — APS, advanced FCS, 44 tons',c:'~147',dot:'r'},{n:'Type 90 MBT',d:'120mm Rheinmetall — Hokkaido defense',c:'~341',dot:''}]},{icon:'🚁',title:'Attack Helicopters',count:'100+',items:[{n:'AH-64D Apache',d:'Longbow radar variant',c:'~50',dot:'cy'},{n:'OH-1 Ninja',d:'Japanese-built observation/attack',c:'~38',dot:''}]}]},
+tech:{items:['Mitsubishi Electric AESA radars — F-2, J/APG-2, exported to Australia for EA-18G','TRDI — AI, quantum sensing, directed energy R&D institute','J-CSAT military comms satellites — XBAND secure encrypted network','SDF Cyber Command — rapid expansion to 4,000 personnel target','JOC (Joint Operations Command) established 2024 — unified C2 structure','HVGP hypersonic glide projectile — island defense, Mach 5+ under development']}
+},
+
+turkey:{id:'turkey',flag:'🇹🇷',name:'Turkey',rank:8,nuclear:false,warheads:0,budget:'$40B',budgetNum:40,personnel:'355K',personnelNum:355000,aircraft:1067,tanks:2229,naval:115,gfp:0.1902,rating:72,
+nuclearNote:null,
+overview:'Turkey has become a major military power through its drone revolution. The Bayraktar TB2 proved devastating in Libya, Syria, Nagorno-Karabakh, and Ukraine. Turkey has NATO\'s 2nd largest army, a booming indigenous defense industry (Baykar, ASELSAN, Roketsan), and the world\'s first drone carrier (TCG Anadolu).',
+metrics:[{v:'$40B',l:'Defense Budget'},{v:'355K',l:'Active Personnel'},{v:'NATO B61 Bombs',l:'Nuclear Status'},{v:'1,067',l:'Total Aircraft'},{v:'World #1',l:'Drone Warfare Tech'}],
+success:[{l:'Drone Warfare',v:97,c:'cyan'},{l:'Land Forces',v:82,c:'orange'},{l:'Indigenous Defense Industry',v:88,c:'green'},{l:'Geopolitical Leverage',v:90,c:'purple'},{l:'Air Force',v:72,c:'orange'},{l:'Naval Power',v:65,c:'cyan'},{l:'Special Forces',v:80,c:'green'},{l:'Combat Experience',v:87,c:'red'}],
+pros:['World leader in armed drone technology (TB2, Akıncı, TB3, Kızılelma)','NATO\'s 2nd largest army by personnel (355,000)','Battle-hardened in Syria, Libya, Nagorno-Karabakh, Iraq, Ukraine','KAAN TF-X indigenous 5th-gen stealth fighter (first flight 2023)','TCG Anadolu — world\'s first dedicated TB3 drone carrier','ASELSAN in top-25 global defense companies','Unique NATO leverage — controls Bosphorus, hosts US nuclear B61 bombs'],
+cons:['Expelled from F-35 program after S-400 purchase from Russia','KAAN TF-X still needs foreign engine (GE F110 or Rolls-Royce)','Economic instability has slowed procurement pace','Strained relations with some NATO allies','F-16s aging rapidly — needs replacement'],
+budget:{total:'$40B',pct:'~5.5% of GDP',personnel:'$15B',procurement:'$12B',rd:'$8B',ops:'$5B',note:'Massive increase driven by domestic threats and regional ambitions. Turkey now a top-5 global defense exporter — TB2 exported to 30+ nations.'},
+tier:'Regional Power',
+bases:[{name:'İncirlik AB (US-Turkish joint)',lat:37.00,lon:35.43,type:'NATO nuclear host — US B61 gravity bombs',size:'major'},{name:'Aksaz Naval Base',lat:36.97,lon:28.30,type:'Navy — Aegean fleet',size:'major'},{name:'Gölcük Naval Base',lat:40.72,lon:29.83,type:'Navy HQ — Sea of Marmara',size:'major'},{name:'Turkish Base N.Cyprus',lat:35.33,lon:33.36,type:'Army occupation force — disputed',size:'major'},{name:'Mogadishu, Somalia',lat:2.00,lon:45.34,type:'Military training & forward base',size:'medium'},{name:'Qatar Military Camp',lat:25.15,lon:51.50,type:'Army forward — Middle East',size:'medium'}],
+aircraft:{cards:[{icon:'✈️',title:'Fighters',count:'240+',items:[{n:'F-16C/D Block 50/70',d:'Core fleet — AESA upgraded for Block 70',c:'~240',dot:''},{n:'KAAN TF-X (5th Gen)',d:'Indigenous stealth — first flight 2023, service ~2028',c:'Dev (240 planned)',dot:'r'}]},{icon:'🤖',title:'Drones (World-Leading)',count:'500+',items:[{n:'Bayraktar TB2',d:'Combat-proven MALE — MAM-L warheads',c:'250+ (Turkey)',dot:'r'},{n:'Bayraktar Akıncı',d:'HALE — 1,350 km range, cruise missile capable',c:'~30+',dot:'r'},{n:'Kızılelma Stealth UCAV',d:'Jet-powered stealth drone — unique globally',c:'Testing',dot:'r'},{n:'TB3 (Carrier-compatible)',d:'Folding wing — for TCG Anadolu operations',c:'Entering service',dot:'cy'}]}]},
+naval:{cards:[{icon:'🚢',title:'Drone Carrier',count:'1',items:[{n:'TCG Anadolu LHD',d:'World\'s 1st drone carrier — TB3 UCAV operations',c:'1',dot:'r'}]},{icon:'⚓',title:'Frigates',count:'16',items:[{n:'MILGEM Frigates',d:'Indigenous — ASELSAN AESA, VLS',c:'4 (+more building)',dot:'r'},{n:'GABYA / Barbaros Class',d:'US/German-built multirole frigates',c:'12',dot:''}]},{icon:'🤿',title:'Submarines',count:'12',items:[{n:'Type 214 / Type 209 AIP',d:'German-designed — silent AIP operations',c:'12',dot:''}]}]},
+missiles:{cards:[{icon:'🎯',title:'Missiles',count:'300+',items:[{n:'SOM-B2 Cruise Missile',d:'350 km stealthy LACM — anti-ship/land',c:'200+',dot:'cy'},{n:'Tayfun SRBM',d:'561 km ballistic missile — high precision',c:'Deploying',dot:'r'},{n:'HİSAR-A/O/U SAM',d:'Short-medium indigenous air defense SAM',c:'~50+ batteries',dot:''}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'4,000+ AFV',items:[{n:'Altay MBT (indigenous)',d:'120mm Rheinmetall — APS entering service',c:'~50',dot:'r'},{n:'M60TM / Sabra',d:'Upgraded M60 main battle tanks',c:'~800',dot:''},{n:'ACV-15 / FNSS Kaplan',d:'Armored fighting vehicles',c:'~800',dot:''}]},{icon:'💥',title:'Artillery',count:'1,000+',items:[{n:'T-155 Fırtına SPH',d:'155mm — indigenous K9 Thunder derived',c:'~350',dot:'g'},{n:'TRG-300 / T-122 MLRS',d:'300mm/122mm rocket artillery',c:'~120',dot:'g'}]}]},
+tech:{items:['Baykar — world\'s hottest drone company; TB2 sold to 30+ nations, combat proven','ASELSAN — Turkey\'s defense electronics giant, top-25 global revenue','Roketsan — indigenous missiles, rockets, guided munitions manufacturer','STM Kargu-2 — autonomous AI-guided loitering munition (swarm capable)','TUBITAK SAGE — defense R&D institute, cruise missile and precision weapon tech','Imece reconnaissance satellite — 2023 launch, 0.5m resolution imagery']}
+},
+
+pakistan:{id:'pakistan',flag:'🇵🇰',name:'Pakistan',rank:9,nuclear:true,warheads:170,budget:'$10.3B',budgetNum:10.3,personnel:'660K',personnelNum:660000,aircraft:1387,tanks:2627,naval:114,gfp:0.2001,rating:65,
+nuclearNote:'~170 warheads — FIRST USE POLICY — world\'s fastest growing nuclear arsenal',
+overview:'Pakistan is a nuclear power with the fastest-growing arsenal globally. Its nuclear doctrine explicitly counters conventionally superior India. Deep China ties modernized the JF-17 fleet and naval assets. The 660,000-strong military is battle-hardened by decades of counterterrorism operations in FATA, KPK, and the Afghan border region.',
+metrics:[{v:'$10.3B',l:'Defense Budget'},{v:'660K',l:'Active Personnel'},{v:'~170',l:'Nuclear Warheads'},{v:'1,387',l:'Total Aircraft'},{v:'2,627',l:'Total Tanks'}],
+success:[{l:'Nuclear Deterrence',v:80,c:'red'},{l:'Land Warfare',v:75,c:'orange'},{l:'Counter-terrorism',v:82,c:'green'},{l:'Air Force',v:70,c:'orange'},{l:'Nuclear Growth Rate',v:92,c:'red'},{l:'Strategic Geography',v:78,c:'purple'},{l:'Naval Power',v:55,c:'cyan'},{l:'Cyber Capability',v:60,c:'green'}],
+pros:['7th largest army by personnel (660,000 active)','Fastest-growing nuclear arsenal globally (~170 warheads)','JF-17 Thunder — capable 4th gen built with China at low cost','Shaheen-III MRBM covers all of India (2,750 km range)','Battle-hardened from decades of FATA/KPK counterterrorism ops','Strong Chinese strategic backing — CPEC corridor defense'],
+cons:['Smallest defense budget among recognized nuclear powers ($10.3B)','Economy under severe stress — multiple IMF bailout programs','Over-reliance on China for military hardware (80%+ imports)','Limited naval capability — no carriers, aging submarines','F-16s restricted by US end-use conditions','International isolation risk from nuclear posture'],
+budget:{total:'$10.3B',pct:'~3.5% of GDP',personnel:'$4.5B',procurement:'$3B',rd:'$0.8B',ops:'$2B',note:'Extremely constrained. Much of budget goes to personnel. Cannot sustain high-intensity conventional war against India for more than a few weeks without nuclear escalation.'},
+tier:'Nuclear State',
+bases:[{name:'PAF Mushaf (Sargodha)',lat:32.05,lon:72.67,type:'Air Force HQ — suspected nuclear storage',size:'major'},{name:'PNS Iqbal, Karachi',lat:24.86,lon:66.99,type:'Pakistan Navy HQ',size:'major'},{name:'PAF Kamra (Minhas)',lat:33.87,lon:72.40,type:'Air Force — F-16 base + PAC',size:'major'},{name:'GHQ Rawalpindi',lat:33.60,lon:73.05,type:'Army General Headquarters',size:'major'},{name:'PAF Masroor, Karachi',lat:24.90,lon:66.93,type:'Southern Air Command',size:'major'}],
+aircraft:{cards:[{icon:'✈️',title:'4th Gen Fleet',count:'350+',items:[{n:'JF-17 Thunder Block III',d:'China-Pakistan — AESA, PL-15 BVR, nuclear capable',c:'~140+',dot:'r'},{n:'F-16 Block 52 / MLU',d:'US-supplied — AIM-120C, nuclear delivery',c:'~76',dot:'g'},{n:'Mirage III/V (Rose upgrade)',d:'Upgraded — Ra\'ad ALCM nuclear delivery',c:'~150',dot:'g'}]}]},
+naval:{cards:[{icon:'🤿',title:'Submarines',count:'8',items:[{n:'Agosta 90B (Khalid-class)',d:'French-built AIP — Babur-3 SLCM capable',c:'3',dot:'r'},{n:'Hangor-class (Type 039B)',d:'8 ordered from China — AIP, modern',c:'0 (+8 ordered)',dot:'r'}]},{icon:'⚓',title:'Frigates',count:'11',items:[{n:'Type 054A/P Frigate',d:'Chinese-built — modern SAM, SSM',c:'4 (+2 building)',dot:''},{n:'Tariq / Zulfiquar class',d:'Older US/UK-built frigates',c:'7',dot:''}]}]},
+missiles:{cards:[{icon:'☢️',title:'Nuclear Missiles',count:'~170 warheads',items:[{n:'Shaheen-III MRBM',d:'2,750 km — covers all of India including Andaman Is.',c:'~50+',dot:'r'},{n:'Ghauri (Hatf-V) MRBM',d:'1,500 km — nuclear, liquid fueled',c:'~30+',dot:'r'},{n:'Ra\'ad-II ALCM',d:'Air-launched nuclear cruise — 550 km',c:'Deployed',dot:'g'},{n:'Babur-3 SLCM',d:'Sub-launched nuclear cruise — sea deterrent leg',c:'Testing/deploying',dot:'cy'}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'4,000+ AFV',items:[{n:'Al-Khalid MBT',d:'Pakistan-China 125mm ERA FCS',c:'~320',dot:'r'},{n:'Type 85-IIAP / T-80UD',d:'Chinese/Ukrainian origin tanks',c:'~1,000+',dot:''},{n:'Al-Zarrar (T-59 upgrade)',d:'Upgraded Chinese Type 59',c:'~1,200',dot:''}]},{icon:'💥',title:'Artillery',count:'1,500+',items:[{n:'SH-15 155mm wheeled SPH',d:'Chinese supply — self-propelled',c:'~200',dot:'g'},{n:'A-100 MLRS (300mm)',d:'Chinese BM-30 Smerch variant',c:'~30+',dot:'g'}]}]},
+tech:{items:['NESCOM — National Engineering & Scientific Commission: manages ballistic missile program','PAEC (Pakistan Atomic Energy Commission) — nuclear warhead design and production','SPD (Strategic Plans Division) — nuclear command & control authority','ISI cyber wing — signals intelligence and growing offensive cyber operations','Chinese technology transfer: JF-17 avionics, HQ-9P SAMs, Type 054A frigates','SUPARCO — space agency with reconnaissance satellite ambitions']}
+},
+
+france:{id:'france',flag:'🇫🇷',name:'France',rank:10,nuclear:true,warheads:290,budget:'$64.7B',budgetNum:64.7,personnel:'204K',personnelNum:204000,aircraft:972,tanks:222,naval:180,gfp:0.2024,rating:77,
+nuclearNote:'~290 warheads · Force de frappe · Fully independent of NATO/US nuclear command',
+overview:'France is Europe\'s most operationally independent military power — the only EU nation capable of full-spectrum unilateral global operations. With a nuclear deterrent, nuclear-powered carrier de Gaulle, Rafale jets, and decades of active overseas interventions in Africa and the Middle East, France projects genuine great-power capability.',
+metrics:[{v:'$64.7B',l:'Defense Budget'},{v:'204K',l:'Active Personnel'},{v:'~290',l:'Nuclear Warheads'},{v:'972',l:'Total Aircraft'},{v:'1',l:'Nuclear Carrier (de Gaulle)'}],
+success:[{l:'Nuclear Independence',v:92,c:'red'},{l:'Naval Strike (de Gaulle)',v:85,c:'cyan'},{l:'Rafale Multirole',v:90,c:'orange'},{l:'Overseas Operations',v:88,c:'orange'},{l:'Special Forces (DGSE/COS)',v:87,c:'green'},{l:'European Leadership',v:82,c:'purple'},{l:'Intelligence (DGSE)',v:85,c:'purple'},{l:'Expeditionary Warfare',v:83,c:'orange'}],
+pros:['Only EU nation with truly independent full-spectrum military capability','Charles de Gaulle — Europe\'s only nuclear-powered CATOBAR carrier','Rafale F4 — arguably best multirole fighter in European service today','Force de frappe — independent nuclear: no US permission required for use','DGSE elite intelligence + COS tier-1 special forces','Active in Sahel, Mali, Iraq, Syria, Libya — highly experienced military','FREMM frigates — world-class multi-mission warships'],
+cons:['Small force size: 204,000 — limits sustained land campaigns','Only 222 Leclerc tanks — very low for a major power','Single carrier — vulnerable when in refit (several months/year)','Next carrier (PANG) not until 2038 — 15-year capability gap','Defense budget smaller than Germany\'s growing military'],
+budget:{total:'$64.7B',pct:'2.0% of GDP',personnel:'$24B',procurement:'$16B',rd:'$12B',ops:'$12.7B',note:'New LPM military programming law (2024-2030) commits €413B over 7 years — biggest increase since Cold War.'},
+tier:'Major Power',
+bases:[{name:'Djibouti (Camp Lemonnier adj.)',lat:11.55,lon:43.15,type:'Navy/Army — Horn of Africa hub',size:'major'},{name:'Réunion — Roland Garros',lat:-20.88,lon:55.52,type:'Air Force — Indian Ocean',size:'major'},{name:'Martinique — Fort-de-France',lat:14.60,lon:-61.08,type:'Navy — Caribbean',size:'major'},{name:'Abu Dhabi (Al Dhafra)',lat:24.24,lon:54.55,type:'Air Force + Navy — Gulf base',size:'major'},{name:'Dakar, Senegal',lat:14.74,lon:-17.49,type:'Army — West Africa hub',size:'major'},{name:'Gabon (Libreville)',lat:0.45,lon:9.41,type:'Army — Equatorial Africa',size:'medium'},{name:'Ivory Coast (Port Bouët)',lat:5.35,lon:-4.00,type:'Army — West Africa',size:'medium'}],
+aircraft:{cards:[{icon:'✈️',title:'Rafale (Backbone)',count:'185+',items:[{n:'Rafale F3-R (land-based)',d:'Nuclear ASMP-A, Meteor BVR, SCALP-EG',c:'~145',dot:'r'},{n:'Rafale F4 (new standard)',d:'Enhanced EW, new weapons, upgraded sensors',c:'~40+',dot:'r'},{n:'Rafale Marine (carrier)',d:'CATOBAR carrier — nuclear delivery role',c:'~40',dot:'g'}]},{icon:'💣',title:'Special Aircraft',count:'50+',items:[{n:'Atlantique 2 MPA',d:'Maritime patrol — sub hunting, ISR',c:'~22',dot:''},{n:'E-3F AWACS',d:'Airborne early warning and control',c:'4',dot:'g'}]}]},
+naval:{cards:[{icon:'🚢',title:'Carrier',count:'1',items:[{n:'Charles de Gaulle R91',d:'Nuclear-powered CATOBAR — 40× Rafale Marine',c:'1 (PANG by 2038)',dot:'r'}]},{icon:'🤿',title:'Submarines',count:'10',items:[{n:'Le Triomphant SSBN',d:'Nuclear — 16× M51.2 SLBM with MIRV',c:'4',dot:'r'},{n:'Suffren-class SSN (Barracuda)',d:'Attack sub — SCALP Naval cruise missile',c:'3 (+3 more)',dot:''}]},{icon:'⚓',title:'Frigates',count:'15+',items:[{n:'FREMM Aquitaine FTI',d:'ASW/ASUW — Aster 15/30, MdCN cruise missile',c:'8',dot:'g'},{n:'FDI (New generation)',d:'Next-gen frigate — entering service',c:'2 (+3)',dot:'r'}]}]},
+missiles:{cards:[{icon:'☢️',title:'Nuclear Arsenal',count:'~290 warheads',items:[{n:'M51.2/M51.3 SLBM',d:'10,000 km — 6× TN75 MIRV warheads',c:'~48 deployed',dot:'r'},{n:'ASMP-A (Air-Launched)',d:'Mach 3+ — 500 km, TN81 warhead, airborne leg',c:'~50',dot:'r'}]},{icon:'🎯',title:'Cruise & Precision',count:'500+',items:[{n:'SCALP-EG / MdCN Naval',d:'1,000 km stealth cruise — air and naval launched',c:'~400+',dot:''},{n:'ASN4G Hypersonic (future)',d:'Mach 6-8 nuclear cruise — replaces ASMP ~2035',c:'Development',dot:'cy'}]}]},
+ground:{cards:[{icon:'🛡️',title:'Armor',count:'700+ AFV',items:[{n:'Leclerc MBT',d:'120mm autoloader, excellent optics, GALIX decoys',c:'~222',dot:''},{n:'VBCI IFV',d:'8×8 wheeled — 25mm, globally deployable',c:'~630',dot:''},{n:'CAESAR 155mm SPH',d:'Wheeled — 40 km range, rapid deploy, 14 nations use',c:'~77 (+300 ordered)',dot:'r'}]}]},
+tech:{items:['DGSE (French CIA) — independent SIGINT capability, Tier-1 human intelligence network','COS Special Operations — 1st RPIMa, 13th Parachute, GIGN — globally deployed','DGA — $12B annual R&D: hypersonics, directed energy, next-gen nuclear warheads','COMCYBER — 3,000+ dedicated cyber operators, offensive and defensive operations','Exocet anti-ship missile — still one of most battle-proven ASMs globally','Ariane 6 — dual-use space launch capability with military reconnaissance satellites']}
+}
+};
+
+/* ══════════ STATE ══════════ */
+let currentC = null;
+let compareSet = new Set();
+let leafletMap = null;
+
+/* ══════════ VIEW SWITCHING ══════════ */
+function showView(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+/* ══════════ BUILD HOME ══════════ */
+function buildHome(){
+  const g = document.getElementById('homeGrid');
+  g.innerHTML = Object.values(DATA).map(c=>`
+    <div class="ccard ${compareSet.has(c.id)?'in-compare':''}" id="hcard-${c.id}">
+      <div class="ccard-accent"></div>
+      <div class="ccard-body">
+        <div class="ccard-top">
+          <div class="ccard-flag">${c.flag}</div>
+          <div class="ccard-info">
+            <div class="ccard-name">${c.name}</div>
+            <div class="ccard-rank">#${c.rank} Global Firepower 2025 · GFP ${c.gfp}</div>
+            ${c.nuclear?`<div class="nuke-tag">☢ Nuclear Power</div>`:''}
+          </div>
+          <div class="ccard-compare-badge">✓</div>
+        </div>
+        <div class="ccard-stats">
+          <div class="cs"><div class="sv">${c.budget}</div><div class="sl">Defense Budget</div></div>
+          <div class="cs"><div class="sv">${c.personnel}</div><div class="sl">Active Personnel</div></div>
+          <div class="cs"><div class="sv">${c.aircraft.toLocaleString()}</div><div class="sl">Aircraft</div></div>
+          <div class="cs"><div class="sv">${c.naval}</div><div class="sl">Naval Vessels</div></div>
+        </div>
+        <div class="rating-row">
+          <div class="rating-label-txt">Power Rating</div>
+          <div class="rating-track"><div class="rating-bar" style="width:${c.rating}%"></div></div>
+          <div class="rating-val">${c.rating}/100</div>
+        </div>
+        <div class="ccard-actions">
+          <button class="btn btn-primary" onclick="openCountry('${c.id}')">🔍 Full Profile</button>
+          <button class="btn btn-secondary" onclick="toggleCompare('${c.id}',event)">${compareSet.has(c.id)?'✓ Added':'⚖ Compare'}</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ══════════ OPEN COUNTRY ══════════ */
+function openCountry(id){
+  const c = DATA[id]; currentC = c;
+  document.getElementById('d-flag').textContent = c.flag;
+  document.getElementById('d-name').textContent = c.name;
+  document.getElementById('d-rank').textContent = `🏅 Rank #${c.rank} · GFP Score ${c.gfp} · ${c.tier}`;
+  document.getElementById('d-overview').textContent = c.overview;
+  document.getElementById('d-rating-big').textContent = c.rating;
+  document.getElementById('d-metrics').innerHTML = c.metrics.map(m=>`<div class="dhm"><div class="mv">${m.v}</div><div class="ml">${m.l}</div></div>`).join('');
+  document.getElementById('d-nuke').innerHTML = c.nuclear?`<div class="nuke-pill">☢ ${c.nuclearNote}</div>`:'';
+  document.getElementById('d-breadcrumb').textContent = `${c.flag} ${c.name}`;
+  const nb = document.getElementById('detail-navbtn');
+  nb.style.display='block'; nb.textContent=`${c.flag} ${c.name}`;
+
+  // reset tabs
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dsec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.dtab')[0].classList.add('active');
+  document.getElementById('dsec-overview').classList.add('active');
+
+  buildOverview(c);
+  buildCards('aircraft',c);
+  buildCards('naval',c);
+  buildCards('missiles',c);
+  buildCards('ground',c);
+  buildTech(c);
+  buildBudget(c);
+  buildRating(c);
+  // bases built on tab click
+  document.getElementById('dsec-bases').innerHTML = '<div style="padding:60px;text-align:center;color:var(--dim)">Click the Bases tab to load the map</div>';
+
+  showView('detail', document.getElementById('detail-navbtn'));
+}
+
+function showDTab(name, btn){
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dsec').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dsec-'+name).classList.add('active');
+  if(name==='bases') buildBases(currentC);
+  // trigger bar animations
+  setTimeout(()=>{
+    document.querySelectorAll('.mbar').forEach(b=>{
+      const w=b.getAttribute('data-w');
+      if(w) b.style.width=w+'%';
+    });
+  },50);
+}
+
+/* ══════════ BUILD SECTIONS ══════════ */
+function buildOverview(c){
+  const s = document.getElementById('dsec-overview');
+  s.innerHTML = `
+    <div class="pc-grid">
+      <div class="pc-card">
+        <div class="pc-header pro">✅ Strengths</div>
+        ${c.pros.map(p=>`<div class="pc-item"><span class="pc-bullet pro">▲</span><span>${p}</span></div>`).join('')}
+      </div>
+      <div class="pc-card">
+        <div class="pc-header con">❌ Weaknesses</div>
+        ${c.cons.map(p=>`<div class="pc-item"><span class="pc-bullet con">▼</span><span>${p}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="meter-card">
+      <div class="meter-title">Capability Assessment</div>
+      ${c.success.map(s=>`
+        <div class="meter-row">
+          <div class="meter-label">${s.l}</div>
+          <div class="meter-track"><div class="mbar ${s.c}" style="width:${s.v}%" data-w="${s.v}"></div></div>
+          <div class="meter-val">${s.v}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function buildCards(key, c){
+  const s = document.getElementById('dsec-'+key);
+  const d = c[key];
+  if(!d||!d.cards){s.innerHTML=`<p style="color:var(--dim);padding:20px">Data not available.</p>`;return;}
+  s.innerHTML = `<div class="cards-grid">${d.cards.map(card=>`
+    <div class="acard">
+      <div class="acard-head">
+        <span class="acard-icon">${card.icon}</span>
+        <span class="acard-title">${card.title}</span>
+        <span class="acard-badge">${card.count}</span>
+      </div>
+      <div class="acard-body">
+        ${card.items.map(item=>`
+          <div class="ai-item">
+            <div class="ai-dot ${item.dot||''}"></div>
+            <div style="flex:1">
+              <div class="ai-name">${item.n}</div>
+              <div class="ai-detail">${item.d}</div>
+            </div>
+            ${item.c?`<div class="ai-count">${item.c}</div>`:''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function buildTech(c){
+  const s = document.getElementById('dsec-tech');
+  s.innerHTML = `<div class="acard" style="max-width:750px">
+    <div class="acard-head"><span class="acard-icon">💻</span><span class="acard-title">Technology, Cyber & Special Capabilities</span></div>
+    <div class="acard-body">
+      ${c.tech.items.map(item=>`
+        <div class="ai-item"><div class="ai-dot a3"></div><div><div class="ai-name">${item}</div></div></div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function buildBases(c){
+  if(!c) return;
+  const s = document.getElementById('dsec-bases');
+  s.innerHTML = `
+    <div class="map-card">
+      <div class="map-header">🗺️ ${c.name} — Military Bases & Strategic Installations (${c.bases.length} locations)</div>
+      <div id="map"></div>
+      <div class="map-legend">
+        <div class="mleg"><div class="mleg-dot" style="background:#00d2ff"></div> Major Base</div>
+        <div class="mleg"><div class="mleg-dot" style="background:#ffa502"></div> Medium / Forward Base</div>
+      </div>
+    </div>
+    <div class="base-list-grid">
+      ${c.bases.map(b=>`
+        <div class="base-chip">
+          <div class="base-icon">${b.size==='major'?'🏛️':'🏠'}</div>
+          <div>
+            <div class="base-name">${b.name}</div>
+            <div class="base-type">${b.type}</div>
+            <span class="base-tag ${b.size}">${b.size.toUpperCase()}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  // init leaflet
+  setTimeout(()=>{
+    if(leafletMap){leafletMap.remove();leafletMap=null;}
+    leafletMap = L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([20,10],2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© OpenStreetMap © CartoDB',maxZoom:18
+    }).addTo(leafletMap);
+    c.bases.forEach(b=>{
+      const col = b.size==='major'?'#00d2ff':'#ffa502';
+      const marker = L.circleMarker([b.lat,b.lon],{
+        radius:b.size==='major'?9:7,
+        fillColor:col,color:'rgba(255,255,255,0.3)',
+        weight:1,opacity:1,fillOpacity:0.9
+      }).addTo(leafletMap);
+      marker.bindPopup(`<div style="font-family:Inter,sans-serif;min-width:200px">
+        <div style="font-weight:700;color:#fff;margin-bottom:4px">${b.name}</div>
+        <div style="color:#aaa;font-size:12px">${b.type}</div>
+        <div style="margin-top:6px;display:inline-block;background:${col}22;border:1px solid ${col}44;color:${col};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">${b.size.toUpperCase()}</div>
+      </div>`,{className:'dark-popup'});
+    });
+  },100);
+}
+
+function buildBudget(c){
+  const s = document.getElementById('dsec-budget');
+  const bd = c.budget;
+  const maxBudget = 886;
+  s.innerHTML = `
+    <div class="budget-hero">
+      <div class="bh-item"><div class="bh-val">${bd.total}</div><div class="bh-label">Total Budget</div><div class="bh-sub">${bd.pct}</div></div>
+      <div class="bh-item"><div class="bh-val">${bd.personnel}</div><div class="bh-label">Personnel</div></div>
+      <div class="bh-item"><div class="bh-val">${bd.procurement}</div><div class="bh-label">Procurement</div></div>
+      <div class="bh-item"><div class="bh-val">${bd.rd}</div><div class="bh-label">R&D</div></div>
+      <div class="bh-item"><div class="bh-val">${bd.ops}</div><div class="bh-label">Operations</div></div>
+    </div>
+    <div style="background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.15);border-radius:12px;padding:18px;margin-bottom:24px;font-size:.85rem;color:var(--dim2);line-height:1.7">${bd.note}</div>
+    <div class="budget-compare">
+      <div class="meter-title">Budget Comparison vs All 10 Nations</div>
+      ${Object.values(DATA).sort((a,b)=>b.budgetNum-a.budgetNum).map(peer=>{
+        const pct = Math.round((peer.budgetNum/maxBudget)*100);
+        const isThis = peer.id===c.id;
+        return `<div class="meter-row">
+          <div class="meter-label" style="${isThis?'color:#fff;font-weight:700':''}">${peer.flag} ${peer.name}</div>
+          <div class="meter-track"><div class="mbar ${isThis?'orange':'cyan'}" style="width:${pct}%" data-w="${pct}"></div></div>
+          <div class="meter-val">${peer.budget}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  setTimeout(()=>document.querySelectorAll('#dsec-budget .mbar').forEach(b=>{
+    const w=b.getAttribute('data-w'); if(w){const tmp=b.style.width;b.style.width='0';setTimeout(()=>b.style.width=tmp,50);}
+  }),100);
+}
+
+function buildRating(c){
+  const s = document.getElementById('dsec-rating');
+  const sorted = Object.values(DATA).sort((a,b)=>b.rating-a.rating);
+  const rank = sorted.findIndex(x=>x.id===c.id)+1;
+  const tier = c.rating>=95?'Superpower':c.rating>=85?'Great Power':c.rating>=75?'Major Power':c.rating>=65?'Regional Power':'Emerging Power';
+  s.innerHTML = `
+    <div class="rating-hero">
+      <div class="rh-big">
+        <div class="rh-score">${c.rating}</div>
+        <div class="rh-label">Power Score / 100</div>
+        <div class="rh-tier">${tier}</div>
+        <div style="font-size:.75rem;color:var(--dim);margin-top:6px">Ranked #${rank} of 10</div>
+      </div>
+      <div>
+        <div class="meter-title">Detailed Capability Breakdown</div>
+        ${c.success.map(s=>`
+          <div class="meter-row">
+            <div class="meter-label">${s.l}</div>
+            <div class="meter-track"><div class="mbar ${s.c}" style="width:${s.v}%" data-w="${s.v}"></div></div>
+            <div class="meter-val">${s.v}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="meter-card">
+      <div class="meter-title">Global Ranking — All 10 Nations</div>
+      ${sorted.map((peer,i)=>{
+        const isThis=peer.id===c.id;
+        return `<div class="meter-row">
+          <div class="meter-label" style="${isThis?'color:#fff;font-weight:700':''}">
+            #${i+1} ${peer.flag} ${peer.name} ${isThis?'← YOU':''}</div>
+          <div class="meter-track"><div class="mbar ${isThis?'orange':'red'}" style="width:${peer.rating}%" data-w="${peer.rating}"></div></div>
+          <div class="meter-val" style="${isThis?'color:var(--accent2)':''}">${peer.rating}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  setTimeout(()=>document.querySelectorAll('#dsec-rating .mbar').forEach(b=>{
+    const w=b.getAttribute('data-w'); if(w){b.style.width='0';setTimeout(()=>b.style.width=w+'%',80);}
+  }),100);
+}
+
+/* ══════════ COMPARE ══════════ */
+function buildCompareChips(){
+  const el = document.getElementById('compareChips');
+  el.innerHTML = Object.values(DATA).map(c=>`
+    <div class="chip ${compareSet.has(c.id)?'selected':''}" id="chip-${c.id}" onclick="toggleCompare('${c.id}',event)">
+      <span class="chip-flag">${c.flag}</span>
+      <div>
+        <div class="chip-name">${c.name}</div>
+        <div class="chip-rank">#${c.rank} · ${c.budget}</div>
+      </div>
+      <div class="chip-check">${compareSet.has(c.id)?'✓':''}</div>
+    </div>
+  `).join('');
+  updateCompareUI();
+}
+
+function toggleCompare(id, e){
+  if(e) e.stopPropagation();
+  if(compareSet.has(id)){
+    compareSet.delete(id);
+  } else {
+    if(compareSet.size>=4){alert('Maximum 4 countries for comparison!');return;}
+    compareSet.add(id);
+  }
+  // update chips
+  const chip = document.getElementById('chip-'+id);
+  if(chip){
+    chip.classList.toggle('selected',compareSet.has(id));
+    chip.querySelector('.chip-check').textContent = compareSet.has(id)?'✓':'';
+  }
+  // update home card
+  const hcard = document.getElementById('hcard-'+id);
+  if(hcard){
+    hcard.classList.toggle('in-compare',compareSet.has(id));
+    const cmpBtn = hcard.querySelector('.btn-secondary');
+    if(cmpBtn) cmpBtn.textContent = compareSet.has(id)?'✓ Added':'⚖ Compare';
+  }
+  updateCompareUI();
+  document.getElementById('compareResult').style.display='none';
+}
+
+function updateCompareUI(){
+  const n = compareSet.size;
+  const countEl = document.getElementById('selCount');
+  const runBtn = document.getElementById('runBtn');
+  if(countEl) countEl.innerHTML = `<span>${n}</span> countr${n!==1?'ies':'y'} selected${n<2?' — need at least 2':''}`;
+  if(runBtn) runBtn.disabled = n<2;
+}
+
+function clearCompare(){
+  compareSet.forEach(id=>{
+    const chip=document.getElementById('chip-'+id);
+    if(chip){chip.classList.remove('selected');chip.querySelector('.chip-check').textContent='';}
+    const hcard=document.getElementById('hcard-'+id);
+    if(hcard){hcard.classList.remove('in-compare');const b=hcard.querySelector('.btn-secondary');if(b)b.textContent='⚖ Compare';}
+  });
+  compareSet.clear();
+  updateCompareUI();
+  document.getElementById('compareResult').style.display='none';
+}
+
+function runComparison(){
+  if(compareSet.size<2) return;
+  const cs = [...compareSet].map(id=>DATA[id]);
+
+  // find bests
+  const maxRating = Math.max(...cs.map(c=>c.rating));
+  const maxBudget = Math.max(...cs.map(c=>c.budgetNum));
+  const maxAircraft = Math.max(...cs.map(c=>c.aircraft));
+  const maxTanks = Math.max(...cs.map(c=>c.tanks));
+  const maxNaval = Math.max(...cs.map(c=>c.naval));
+  const maxWarheads = Math.max(...cs.map(c=>c.warheads||0));
+  const maxPersonnel = Math.max(...cs.map(c=>c.personnelNum));
+
+  const rows = [
+    {label:'Country',fn:c=>`<div style="font-size:1.8rem">${c.flag}</div><div class="ct-val" style="margin-top:4px">${c.name}</div><div class="ct-sub">Rank #${c.rank}</div>`},
+    {label:'Defense Budget',fn:c=>`<div class="ct-val">${c.budget}</div><div class="ct-sub">${c.budget.includes('B')?'Billion USD':''}</div>`,best:c=>c.budgetNum===maxBudget},
+    {label:'Active Personnel',fn:c=>`<div class="ct-val">${c.personnel}</div>`,best:c=>c.personnelNum===maxPersonnel},
+    {label:'Total Aircraft',fn:c=>`<div class="ct-val">${c.aircraft.toLocaleString()}</div>`,best:c=>c.aircraft===maxAircraft},
+    {label:'Tanks',fn:c=>`<div class="ct-val">${c.tanks.toLocaleString()}</div>`,best:c=>c.tanks===maxTanks},
+    {label:'Naval Vessels',fn:c=>`<div class="ct-val">${c.naval}</div>`,best:c=>c.naval===maxNaval},
+    {label:'Nuclear Warheads',fn:c=>`<div class="ct-val" style="color:${c.nuclear?'var(--accent)':'var(--dim)'}">${c.nuclear?(c.warheads||0).toLocaleString():'None'}</div>`,best:c=>(c.warheads||0)===maxWarheads&&c.warheads>0},
+    {label:'Power Rating',fn:c=>`<div class="ct-val" style="font-size:1.1rem">${c.rating}<span style="font-size:.7rem;color:var(--dim)">/100</span></div>`,best:c=>c.rating===maxRating},
+    {label:'Tier',fn:c=>`<div class="ct-val" style="font-size:.8rem">${c.tier||'—'}</div>`},
+    {label:'Nuclear Power',fn:c=>`<div style="font-size:1.2rem">${c.nuclear?'☢️ Yes':'❌ No'}</div>`},
+  ];
+
+  const thRow = `<tr><th class="rh">Category</th>${cs.map(c=>`<th class="country-th">${c.flag} ${c.name}</th>`).join('')}</tr>`;
+  const bodyRows = rows.map(row=>{
+    const cells = cs.map(c=>{
+      const isBest = row.best && row.best(c);
+      return `<td class="${isBest?'best-cell':''}">${row.fn(c)}${isBest?'<div class="best-label">▲ BEST</div>':''}</td>`;
+    }).join('');
+    return `<tr><td class="rh">${row.label}</td>${cells}</tr>`;
+  }).join('');
+
+  // insights
+  const topRated = cs.reduce((a,b)=>b.rating>a.rating?b:a);
+  const topBudget = cs.reduce((a,b)=>b.budgetNum>a.budgetNum?b:a);
+  const topAir = cs.reduce((a,b)=>b.aircraft>a.aircraft?b:a);
+  const topNaval = cs.reduce((a,b)=>b.naval>a.naval?b:a);
+  const topTank = cs.reduce((a,b)=>b.tanks>a.tanks?b:a);
+  const nukes = cs.filter(c=>c.nuclear);
+  const topPop = cs.reduce((a,b)=>b.personnelNum>a.personnelNum?b:a);
+
+  const insightCards = [
+    {icon:'🏆',label:'Strongest Overall',val:`${topRated.flag} ${topRated.name}`,sub:`Rating: ${topRated.rating}/100`},
+    {icon:'💰',label:'Biggest Spender',val:`${topBudget.flag} ${topBudget.name}`,sub:topBudget.budget},
+    {icon:'✈️',label:'Largest Air Force',val:`${topAir.flag} ${topAir.name}`,sub:`${topAir.aircraft.toLocaleString()} aircraft`},
+    {icon:'⚓',label:'Largest Navy',val:`${topNaval.flag} ${topNaval.name}`,sub:`${topNaval.naval} vessels`},
+    {icon:'🛡️',label:'Most Tanks',val:`${topTank.flag} ${topTank.name}`,sub:`${topTank.tanks.toLocaleString()} tanks`},
+    {icon:'👥',label:'Most Personnel',val:`${topPop.flag} ${topPop.name}`,sub:topPop.personnel},
+    {icon:'☢️',label:'Nuclear Powers',val:nukes.length?nukes.map(c=>c.flag+' '+c.name).join(', '):'None in selection',sub:`${nukes.length} of ${cs.length} selected`},
+    {icon:'⚡',label:'Budget Gap',val:`${Math.round((maxBudget/Math.min(...cs.map(c=>c.budgetNum))*10))/10}× difference`,sub:`${topBudget.name} spends most`},
+  ].map(i=>`<div class="insight-card"><div class="insight-icon">${i.icon}</div><div class="insight-label">${i.label}</div><div class="insight-value">${i.val}</div><div class="insight-sub">${i.sub}</div></div>`).join('');
+
+  // rating compare bars
+  const ratingBars = cs.sort((a,b)=>b.rating-a.rating).map(c=>`
+    <div class="meter-row">
+      <div class="meter-label">${c.flag} ${c.name}</div>
+      <div class="meter-track"><div class="mbar ${c.rating===maxRating?'orange':'red'}" style="width:${c.rating}%" data-w="${c.rating}"></div></div>
+      <div class="meter-val">${c.rating}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('compareResult').style.display='block';
+  document.getElementById('compareResult').innerHTML = `
+    <div class="ctable-wrap">
+      <table class="ctable"><thead>${thRow}</thead><tbody>${bodyRows}</tbody></table>
+    </div>
+    <div class="insights-grid">${insightCards}</div>
+    <div class="meter-card">
+      <div class="meter-title">Power Rating Comparison</div>
+      ${ratingBars}
+    </div>
+  `;
+
+  // animate bars
+  setTimeout(()=>{
+    document.querySelectorAll('#compareResult .mbar').forEach(b=>{
+      const w=b.getAttribute('data-w');
+      if(w){b.style.width='0';setTimeout(()=>b.style.width=w+'%',60);}
+    });
+  },100);
+
+  document.getElementById('compareResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ══════════ INIT ══════════ */
+buildHome();
+buildCompareChips();
+</script>
+</body>
+</html>
